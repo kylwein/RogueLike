@@ -3,9 +3,10 @@ import constants
 import math
 
 class Character():
-    def __init__(self, x, y, mob_animations, mob_index):
+    def __init__(self, x, y, mob_animations, mob_type):
+        self.mob_type = mob_type
         self.flip = False
-        self.animation_list = mob_animations[mob_index]
+        self.animation_list = mob_animations[mob_type]
         self.frame_index = 0 # index to change sprite states
         self.move_state = 0 # idle = 0, run = 1, ...
         self.update_time = pygame.time.get_ticks() # time since frame updated
@@ -52,5 +53,9 @@ class Character():
 
     def draw(self, surface):
         flipped_image = pygame.transform.flip(self.image, self.flip, False)
-        surface.blit(flipped_image, self.rect)
+
+        if self.mob_type == 0:
+            surface.blit(flipped_image, (self.rect.x, self.rect.y - constants.PLAYER_SCALE * constants.OFFSET))
+        else:
+            surface.blit(flipped_image, self.rect)
         pygame.draw.rect(surface, constants.RED, self.rect, 1)

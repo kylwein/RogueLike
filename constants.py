@@ -1,5 +1,8 @@
+OFFSET = 12
 FPS = 60
-IMAGE_SCALE = 3
+
+PLAYER_SCALE = 3
+WEAPON_SCALE = 1.5
 
 # eg. idle animation loop time for character
 ANIMATION_COOLDOWN = 100

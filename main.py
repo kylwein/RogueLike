@@ -2,7 +2,7 @@
 import pygame
 import constants
 from character import Character
-
+from weapon import Weapon
 
 # initializes pygame
 pygame.init()
@@ -28,7 +28,11 @@ def scale_image(image, scale):
   return pygame.transform.scale(image, (w * scale, h * scale))
 
 
-# loads all entities
+# loads all weapons
+pistol_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha()
+pistol_image = scale_image(pistol_img, constants.WEAPON_SCALE)
+
+# loads all mob entities
 mob_animations = []
 mob_types = ["elf", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon"]
 animation_types = ["idle", "run"]
@@ -43,7 +47,7 @@ for mob in mob_types:
 
     for i in range(4):
       img = pygame.image.load(f"assets/images/characters/{mob}/{animation}/{i}.png").convert_alpha()
-      img = scale_image(img, constants.IMAGE_SCALE)
+      img = scale_image(img, constants.PLAYER_SCALE)
       temp_action_list.append(img)
 
     temp_mob_list.append(temp_action_list)
@@ -54,8 +58,10 @@ for mob in mob_types:
 
 
 # creates our hero!
-player = Character(100, 100, mob_animations, 2)
+player = Character(100, 100, mob_animations, 0)
 
+# creates our hero's weapon
+pistol = Weapon(pistol_image)
 
 # keeps window open till user closes it
 run = True
@@ -86,10 +92,11 @@ while run:
 
   # updates player animated state
   player.update()
+  pistol.update(player)
 
-  # displays the player (Jason!)
+  # displays the player (Jason!) and weapon
   player.draw(screen)
-
+  pistol.draw(screen)
 
   # event handler
   for event in pygame.event.get():
