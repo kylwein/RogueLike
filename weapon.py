@@ -40,7 +40,7 @@ class Projectile(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.original_image = image
         self.angle = angle
-        self.image = pygame.transform.rotate(self.original_image, self.angle)
+        self.image = pygame.transform.rotate(self.original_image, self.angle - 90)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
