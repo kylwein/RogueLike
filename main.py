@@ -33,7 +33,7 @@ pistol_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha
 pistol_image = scale_image(pistol_img, constants.WEAPON_SCALE)
 
 # loads ammo projectile
-projectile_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha()
+projectile_img = pygame.image.load("assets/images/weapons/blue_lightsaber.png").convert_alpha()
 projectile_image = scale_image(projectile_img, constants.WEAPON_SCALE)
 
 # loads all mob entities
@@ -63,12 +63,11 @@ for mob in mob_types:
 
 # creates our hero!
 player = Character(100, 100, mob_animations, 0)
-
 # creates our hero's weapon
 pistol = Weapon(pistol_image, projectile_image)
-
 # creates sprite group for projectiles
 projectile_group = pygame.sprite.Group()
+
 
 # keeps window open till user closes it
 run = True
@@ -76,7 +75,6 @@ while run:
 
   # sets frame rate
   clock.tick(constants.FPS)
-
   # sets screen background - find a way to make it a map
   screen.fill(constants.BACKGROUND)
 
@@ -102,7 +100,8 @@ while run:
   projectile = pistol.update(player)
   if projectile:
     projectile_group.add(projectile)
-
+  for projectile in projectile_group:
+    projectile.update()
 
   # displays the player (Jason!) and weapon
   player.draw(screen)
