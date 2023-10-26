@@ -103,6 +103,8 @@ while run:
   for projectile in projectile_group:
     projectile.update()
 
+  print(projectile_group)
+
   # displays the player (Jason!) and weapon
   player.draw(screen)
   pistol.draw(screen)
