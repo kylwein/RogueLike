@@ -38,7 +38,7 @@ projectile_image = scale_image(projectile_img, constants.WEAPON_SCALE)
 
 # loads all mob entities
 mob_animations = []
-mob_types = ["elf", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon"]
+mob_types = ["jason", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon"]
 animation_types = ["idle", "run"]
 
 for mob in mob_types:
