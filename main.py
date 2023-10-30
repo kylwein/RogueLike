@@ -69,6 +69,9 @@ pistol = Weapon(pistol_image, projectile_image)
 projectile_group = pygame.sprite.Group()
 
 
+# creates an enemy
+enemy = Character(100, 100, mob_animations, 1)
+
 # keeps window open till user closes it
 run = True
 while run:
