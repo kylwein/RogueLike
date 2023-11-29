@@ -1,6 +1,7 @@
 import pygame
 import math
 import constants
+import random
 
 
 class Weapon():
@@ -52,7 +53,11 @@ class Projectile(pygame.sprite.Sprite):
         self.dx = math.cos(math.radians(self.angle)) * constants.PROJECTILE_SPEED
         self.dy = -(math.sin(math.radians(self.angle)) * constants.PROJECTILE_SPEED)
 
-    def update(self):
+    def update(self, enemy_list):
+        #reset variables
+        damage = 0
+        damage_pos = None
+
         # makes projectile move in specific direction
         self.rect.x += self.dx
         self.rect.y += self.dy
@@ -60,6 +65,22 @@ class Projectile(pygame.sprite.Sprite):
         # deletes projectile if it goes off screen
         if self.rect.right < 0 or self.rect.left > constants.SCREEN_WIDTH or self.rect.bottom < 0 or self.rect.top > constants.SCREEN_HEIGHT:
             self.kill() # deletes projectile
+
+        #check collision between weapon and enemy !!!
+        for enemy in enemy_list:
+            if enemy.rect.colliderect(self.rect) and enemy.alive: # see if weapon hits enemy
+                damage = 10 + random.randint(-5, 5)
+                damage_pos = enemy.rect
+                enemy.health -= damage
+                self.kill()
+                break
+
+        return damage, damage_pos
+
+
+
+
+
 
     def draw(self, surface):
         surface.blit(self.image, ((self.rect.centerx - int(self.image.get_width()/2)), (self.rect.centery - int(self.image.get_height()/2))))

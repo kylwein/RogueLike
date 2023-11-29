@@ -3,13 +3,18 @@ import constants
 import math
 
 class Character():
-    def __init__(self, x, y, mob_animations, mob_type):
+    def __init__(self, x, y, health, mob_animations, mob_type):
         self.mob_type = mob_type
         self.flip = False
         self.animation_list = mob_animations[mob_type]
         self.frame_index = 0 # index to change sprite states
         self.move_state = 0 # idle = 0, run = 1, ...
         self.update_time = pygame.time.get_ticks() # time since frame updated
+        self.health = health
+        self.alive = True
+
+
+        # image stuff :)
         self.image = self.animation_list[self.move_state][self.frame_index]
         self.rect = pygame.Rect(0, 0, 40, 40)
         self.rect.center = (x, y)
@@ -38,6 +43,10 @@ class Character():
 
     def update(self):
 
+        if self.health <= 0: #see if your dead
+            self.health = 0
+            self.alive = False
+
 
         # sets current character frame state -- idle version
         self.image = self.animation_list[self.move_state][self.frame_index]
@@ -58,4 +67,4 @@ class Character():
             surface.blit(flipped_image, (self.rect.x, self.rect.y - constants.PLAYER_SCALE * constants.OFFSET))
         else:
             surface.blit(flipped_image, self.rect)
-        pygame.draw.rect(surface, constants.RED, self.rect, 1)
+            pygame.draw.rect(surface, constants.RED, self.rect, 1)
