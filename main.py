@@ -21,6 +21,10 @@ moving_right = False
 moving_up = False
 moving_down = False
 
+
+#define font!!
+font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
+
 # helper function for image scaling
 def scale_image(image, scale):
   w = image.get_width()
@@ -59,18 +63,44 @@ for mob in mob_types:
   mob_animations.append(temp_mob_list)
 
 
+#damage class
+class DamageText(pygame.sprite.Sprite):
+  def __init__(self, x, y, damage, color):
+    pygame.sprite.Sprite.__init__(self)
+    self.image = font.render(damage, True, color)
+    self.rect = self.image.get_rect()
+    self.rect.center = (x,y)
+    self.counter = 0
+
+  def update(self):
+    #move damage text up
+    self.rect.y -= 1
+    # delete the counter after time
+    self.counter += 1
+    if self.counter >30:
+      self.kill()
 
 
 # creates our hero!
-player = Character(100, 100, mob_animations, 0)
+player = Character(100, 100, 100, mob_animations, 0)
+
+# create our first monster
+enemy = Character(200, 300, 100, mob_animations, 1) # imp character
+
+#monster list
+enemy_list = []
+enemy_list.append(enemy)
+
 # creates our hero's weapon
 pistol = Weapon(pistol_image, projectile_image)
 # creates sprite group for projectiles
+
+damage_text_group = pygame.sprite.Group()
 projectile_group = pygame.sprite.Group()
 
 
 # keeps window open till user closes it
-run = True
+run = True # GAME LOOP
 while run:
 
   # sets frame rate
@@ -95,21 +125,35 @@ while run:
   # moves player
   player.move(dx, dy)
 
+
+# updates enemy animated state
+  for enemy in enemy_list:
+    enemy.update()
+
   # updates player animated state
   player.update()
   projectile = pistol.update(player)
   if projectile:
     projectile_group.add(projectile)
   for projectile in projectile_group:
-    projectile.update()
+    damage, damage_pos = projectile.update(enemy_list)
+    if damage:
+      damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
+      damage_text_group.add(damage_text)
+  damage_text_group.update()
 
   print(projectile_group)
+
+  # displays the enemy
+  for enemy in enemy_list:
+    enemy.draw(screen)
 
   # displays the player (Jason!) and weapon
   player.draw(screen)
   pistol.draw(screen)
   for projectile in projectile_group:
     projectile.draw(screen)
+  damage_text_group.draw(screen)
 
   # event handler
   for event in pygame.event.get():
