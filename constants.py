@@ -3,6 +3,7 @@ FPS = 60
 
 PLAYER_SCALE = 3
 WEAPON_SCALE = 1.5
+ITEM_SCALE = 3
 
 # eg. idle animation loop time for character
 ANIMATION_COOLDOWN = 100
@@ -16,3 +17,5 @@ BACKGROUND = (40, 40, 40)
 
 PLAYER_SPEED = 5
 PROJECTILE_SPEED = 10
+
+HUD_COLOR = (75, 75, 75)

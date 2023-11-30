@@ -31,6 +31,10 @@ def scale_image(image, scale):
   h = image.get_height()
   return pygame.transform.scale(image, (w * scale, h * scale))
 
+# loads heart
+empty_heart = scale_image(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(), constants.ITEM_SCALE)
+half_heart = scale_image(pygame.image.load("assets/images/items/heart_half.png").convert_alpha(), constants.ITEM_SCALE)
+full_heart = scale_image(pygame.image.load("assets/images/items/heart_full.png").convert_alpha(), constants.ITEM_SCALE)
 
 # loads all weapons
 pistol_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha()
@@ -61,6 +65,25 @@ for mob in mob_types:
     temp_mob_list.append(temp_action_list)
 
   mob_animations.append(temp_mob_list)
+
+#display game info
+def game_info():
+  #draw HUD
+  pygame.draw.rect(screen, (constants.HUD_COLOR), (0, 0, constants.SCREEN_WIDTH, 50))
+
+  #draw hearts
+  has_half_heart = False
+  for i in range(5):
+    if player.health >= ((i + 1) * 20):
+      screen.blit(full_heart, (10 + i * 50, 0))
+    elif (player.health % 20 > 0) and has_half_heart == False:
+      screen.blit(half_heart, (10 + i * 50, 0))
+      has_half_heart = True
+    else:
+      screen.blit(empty_heart, (10 + i * 50, 0))
+
+
+
 
 
 #damage class
@@ -100,7 +123,7 @@ projectile_group = pygame.sprite.Group()
 
 
 # creates an enemy
-enemy = Character(100, 100, mob_animations, 1)
+#enemy = Character(100, 100, mob_animations, 1)
 
 # keeps window open till user closes it
 run = True # GAME LOOP
@@ -157,6 +180,8 @@ while run:
   for projectile in projectile_group:
     projectile.draw(screen)
   damage_text_group.draw(screen)
+
+  game_info()
 
   # event handler
   for event in pygame.event.get():
