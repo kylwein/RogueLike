@@ -3,6 +3,7 @@ import pygame
 import constants
 from character import Character
 from weapon import Weapon
+from item import Item
 
 # initializes pygame
 pygame.init()
@@ -36,6 +37,18 @@ empty_heart = scale_image(pygame.image.load("assets/images/items/heart_empty.png
 half_heart = scale_image(pygame.image.load("assets/images/items/heart_half.png").convert_alpha(), constants.ITEM_SCALE)
 full_heart = scale_image(pygame.image.load("assets/images/items/heart_full.png").convert_alpha(), constants.ITEM_SCALE)
 
+# loads coin
+coin_frames = []
+for i in range(4):
+  image = scale_image(pygame.image.load(f"assets/images/items/coin_f{i}.png").convert_alpha(), constants.ITEM_SCALE)
+  coin_frames.append(image)
+
+# load consumables
+pwr_up = []
+for i in range(4):
+  image = scale_image(pygame.image.load("assets/images/items/potion_red.png").convert_alpha(), constants.ITEM_SCALE)
+  pwr_up.append(image)
+
 # loads all weapons
 pistol_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha()
 pistol_image = scale_image(pistol_img, constants.WEAPON_SCALE)
@@ -66,6 +79,11 @@ for mob in mob_types:
 
   mob_animations.append(temp_mob_list)
 
+#draw text onto screen
+def draw_text(text, font, color, x, y):
+  image = font.render(text, True, color)
+  screen.blit(image, (x, y))
+
 #display game info
 def game_info():
   #draw HUD
@@ -82,8 +100,8 @@ def game_info():
     else:
       screen.blit(empty_heart, (10 + i * 50, 0))
 
-
-
+  #draw wallet
+  draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 500, 15)
 
 
 #damage class
@@ -121,6 +139,13 @@ pistol = Weapon(pistol_image, projectile_image)
 damage_text_group = pygame.sprite.Group()
 projectile_group = pygame.sprite.Group()
 
+item_group = pygame.sprite.Group()
+
+potion = Item(200, 200, 1, pwr_up)
+item_group.add(potion)
+
+coin = Item(400, 400, 0, coin_frames)
+item_group.add(coin)
 
 # creates an enemy
 #enemy = Character(100, 100, mob_animations, 1)
@@ -168,20 +193,26 @@ while run:
       damage_text_group.add(damage_text)
   damage_text_group.update()
 
+  item_group.update(player)
+
   print(projectile_group)
 
   # displays the enemy
   for enemy in enemy_list:
     enemy.draw(screen)
 
-  # displays the player (Jason!) and weapon
+  # displays the player (Jason!), weapon, and items
   player.draw(screen)
   pistol.draw(screen)
   for projectile in projectile_group:
     projectile.draw(screen)
   damage_text_group.draw(screen)
+  item_group.draw(screen)
 
   game_info()
+
+
+
 
   # event handler
   for event in pygame.event.get():

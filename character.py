@@ -12,6 +12,7 @@ class Character():
         self.update_time = pygame.time.get_ticks() # time since frame updated
         self.health = health
         self.alive = True
+        self.money = 0
 
 
         # image stuff :)
