@@ -70,5 +70,6 @@ class Character():
         if self.mob_type == 0:
             surface.blit(flipped_image, (self.rect.x, self.rect.y - constants.PLAYER_SCALE * constants.OFFSET))
         else:
-            surface.blit(flipped_image, self.rect)
-            pygame.draw.rect(surface, constants.RED, self.rect, 1)
+            if self.alive:
+                surface.blit(flipped_image, self.rect)
+                pygame.draw.rect(surface, constants.RED, self.rect, 1)

@@ -29,3 +29,6 @@ class Item(pygame.sprite.Sprite):
             self.update_time = pygame.time.get_ticks()
         if self.frame_index >= len(self.animations):
             self.frame_index = 0
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)

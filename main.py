@@ -100,8 +100,15 @@ def game_info():
     else:
       screen.blit(empty_heart, (10 + i * 50, 0))
 
-  #draw wallet
+  #draw wallet ***change how money is displayed
   draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 500, 15)
+
+
+def draw_grid():
+  for x in range(30):
+    pygame.draw.line(screen, constants.WHITE, (x * 40, 0), (x * 40, constants.SCREEN_HEIGHT))
+    pygame.draw.line(screen, constants.WHITE, (0, x * 40), (constants.SCREEN_WIDTH, x * 40))
+
 
 
 #damage class
@@ -138,8 +145,9 @@ pistol = Weapon(pistol_image, projectile_image)
 
 damage_text_group = pygame.sprite.Group()
 projectile_group = pygame.sprite.Group()
-
 item_group = pygame.sprite.Group()
+
+score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_frames)
 
 potion = Item(200, 200, 1, pwr_up)
 item_group.add(potion)
@@ -158,6 +166,8 @@ while run:
   clock.tick(constants.FPS)
   # sets screen background - find a way to make it a map
   screen.fill(constants.BACKGROUND)
+
+  draw_grid()
 
   # change in x and y
   dx = 0
@@ -209,8 +219,11 @@ while run:
   damage_text_group.draw(screen)
   item_group.draw(screen)
 
+  # draws top part of screen with hp, etc
   game_info()
 
+  # draws little coin on top right
+  score_coin.draw(screen)
 
 
 
