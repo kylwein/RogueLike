@@ -27,10 +27,13 @@ class Character():
             dx = dx * math.sqrt(2)/2
             dy = dy * math.sqrt(2)/2
 
-        # faces the player the correct way
-        if dx > 0:
+        # faces the player where the cursor is
+        pos = pygame.mouse.get_pos()
+        x_dist = pos[0] - self.rect.centerx
+
+        if x_dist > 0:
             self.flip = False
-        if dx < 0:
+        if x_dist < 0:
             self.flip = True
 
         # updates player pos

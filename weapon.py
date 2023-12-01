@@ -13,6 +13,7 @@ class Weapon():
         self.rect = self.image.get_rect()
         self.fired = False
         self.last_shot = pygame.time.get_ticks()
+        self.flip = False
 
     def update(self, player):
         shot_cooldown = 300
@@ -24,6 +25,12 @@ class Weapon():
         x_dist = pos[0] - self.rect.centerx
         y_dist = -(pos[1] - self.rect.centery)
         self.angle = math.degrees(math.atan2(y_dist, x_dist))
+
+        # makes weapon point where mouse cursor is
+        if x_dist > 0:
+            self.flip = False
+        if x_dist < 0:
+            self.flip = True
 
         # self.fired prevents player from spamming infinite bullets
         if pygame.mouse.get_pressed()[0] and self.fired == False and (pygame.time.get_ticks() - self.last_shot >= shot_cooldown): # 0 is left mouse button
@@ -38,7 +45,12 @@ class Weapon():
         return projectile
 
     def draw(self, surface):
-        self.image = pygame.transform.rotate(self.original_image, self.angle)
+        # flips image across player vertical axis
+        flipped_image = pygame.transform.flip(self.original_image, False, self.flip)
+
+        # fixes the angle the weapon is facing
+        self.image = pygame.transform.rotate(flipped_image, self.angle)
+
         surface.blit(self.image, ((self.rect.centerx - int(self.image.get_width()/2)), (self.rect.centery - int(self.image.get_height()/2))))
 
 class Projectile(pygame.sprite.Sprite):
