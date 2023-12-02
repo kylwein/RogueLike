@@ -32,9 +32,9 @@ moving_down = False
 level = 2
 screen_scroll = [0, 0]
 
-
 #define font!!
 font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
+
 
 # helper function for image scaling
 def scale_image(image, scale):
@@ -42,6 +42,8 @@ def scale_image(image, scale):
   h = image.get_height()
   return pygame.transform.scale(image, (w * scale, h * scale))
 
+
+# ** LOADS ITEMS **
 # loads heart
 empty_heart = scale_image(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(), constants.ITEM_SCALE)
 half_heart = scale_image(pygame.image.load("assets/images/items/heart_half.png").convert_alpha(), constants.ITEM_SCALE)
@@ -66,6 +68,7 @@ pistol_image = scale_image(pistol_img, constants.WEAPON_SCALE)
 # loads ammo projectile
 projectile_img = pygame.image.load("assets/images/weapons/blue_lightsaber.png").convert_alpha()
 projectile_image = scale_image(projectile_img, constants.WEAPON_SCALE)
+
 
 # creates our level tileset
 tile_list = []
@@ -97,12 +100,12 @@ for mob in mob_types:
 
   mob_animations.append(temp_mob_list)
 
-#draw text onto screen
+# draws text onto screen
 def draw_text(text, font, color, x, y):
   image = font.render(text, True, color)
   screen.blit(image, (x, y))
 
-#display game info
+# displays game info
 def game_info():
   #draw HUD
   pygame.draw.rect(screen, (constants.HUD_COLOR), (0, 0, constants.SCREEN_WIDTH, 50))
@@ -118,8 +121,11 @@ def game_info():
     else:
       screen.blit(empty_heart, (10 + i * 50, 0))
 
+  # draws the level number
+  draw_text("LEVEL: " + str(level), font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
+
   #draw wallet ***change how money is displayed
-  draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 500, 15)
+  draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 150, 15)
 
 
 # tileset creation for level
