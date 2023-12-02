@@ -1,9 +1,15 @@
-
 import pygame
 import constants
 from character import Character
 from weapon import Weapon
 from item import Item
+from world import World
+
+
+# *** ADDITIONAL TO DO LIST ***
+# ( ) Fix enemy hitbox
+
+
 
 # initializes pygame
 pygame.init()
@@ -14,7 +20,6 @@ pygame.display.set_caption("Jason Journey")
 
 # sets game frame rate
 clock = pygame.time.Clock()
-
 
 # movement trigger variables
 moving_left = False
@@ -56,6 +61,14 @@ pistol_image = scale_image(pistol_img, constants.WEAPON_SCALE)
 # loads ammo projectile
 projectile_img = pygame.image.load("assets/images/weapons/blue_lightsaber.png").convert_alpha()
 projectile_image = scale_image(projectile_img, constants.WEAPON_SCALE)
+
+# creates our level tileset
+tile_list = []
+for x in range(constants.DIFF_TILES):
+  tile_image = pygame.image.load(f"assets/images/tiles/{x}.png").convert_alpha()
+  tile_image = pygame.transform.scale(tile_image, (constants.TILE_SIZE, constants.TILE_SIZE))
+  tile_list.append(tile_image)
+
 
 # loads all mob entities
 mob_animations = []
@@ -104,10 +117,26 @@ def game_info():
   draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 500, 15)
 
 
+# tileset creation for level
+world_data = [
+[7, 7, 7, 7, 7],
+[7, 0, 2, 2, 7],
+[7, 1, 3, 4, 7],
+[7, 4, 6, 1, 7],
+[7, 7, 7, 7, 7],
+]
+
+world = World()
+world.process_data(world_data, tile_list)
+
+
+
+# this function can be deleted later on, it just shows the grid outlines
+# make sure to also delete where it is being called down below
 def draw_grid():
   for x in range(30):
-    pygame.draw.line(screen, constants.WHITE, (x * 40, 0), (x * 40, constants.SCREEN_HEIGHT))
-    pygame.draw.line(screen, constants.WHITE, (0, x * 40), (constants.SCREEN_WIDTH, x * 40))
+    pygame.draw.line(screen, constants.WHITE, (x * constants.TILE_SIZE, 0), (x * constants.TILE_SIZE, constants.SCREEN_HEIGHT))
+    pygame.draw.line(screen, constants.WHITE, (0, x * constants.TILE_SIZE), (constants.SCREEN_WIDTH, x * constants.TILE_SIZE))
 
 
 
@@ -207,6 +236,10 @@ while run:
 
   print(projectile_group)
 
+  # ** DRAW METHODS **
+  # creates the level tileset
+  world.draw(screen)
+
   # displays the enemy
   for enemy in enemy_list:
     enemy.draw(screen)
@@ -214,15 +247,15 @@ while run:
   # displays the player (Jason!), weapon, and items
   player.draw(screen)
   pistol.draw(screen)
+
+  # prpjectiles (weapon bullets, etc)
   for projectile in projectile_group:
     projectile.draw(screen)
   damage_text_group.draw(screen)
   item_group.draw(screen)
 
-  # draws top part of screen with hp, etc
+  # draws top part of screen with hp, text, coin sprite
   game_info()
-
-  # draws little coin on top right
   score_coin.draw(screen)
 
 

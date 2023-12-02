@@ -1,9 +1,14 @@
 OFFSET = 12
 FPS = 60
 
+SCALE = 3
 PLAYER_SCALE = 3
 WEAPON_SCALE = 1.5
 ITEM_SCALE = 3
+
+
+TILE_SIZE = 16 * SCALE
+DIFF_TILES = 17 # eg. tile0.png, ... tile17.png
 
 # eg. idle animation loop time for character
 ANIMATION_COOLDOWN = 100
@@ -20,3 +25,7 @@ PLAYER_SPEED = 5
 PROJECTILE_SPEED = 10
 
 HUD_COLOR = (75, 75, 75)
+
+# used for loading premade 150x150 tile levels
+ROWS = 150
+COLS = 150

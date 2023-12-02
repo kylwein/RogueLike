@@ -17,7 +17,7 @@ class Character():
 
         # image stuff :)
         self.image = self.animation_list[self.move_state][self.frame_index]
-        self.rect = pygame.Rect(0, 0, 40, 40)
+        self.rect = pygame.Rect(0, 0, constants.TILE_SIZE, constants.TILE_SIZE) # makes player same size as tile
         self.rect.center = (x, y)
 
 
