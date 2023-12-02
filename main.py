@@ -1,4 +1,5 @@
 import pygame
+import csv
 import constants
 from character import Character
 from weapon import Weapon
@@ -26,6 +27,10 @@ moving_left = False
 moving_right = False
 moving_up = False
 moving_down = False
+
+# defines which level to load from csv
+level = 2
+screen_scroll = [0, 0]
 
 
 #define font!!
@@ -118,13 +123,21 @@ def game_info():
 
 
 # tileset creation for level
-world_data = [
-[7, 7, 7, 7, 7],
-[7, 0, 2, 2, 7],
-[7, 1, 3, 4, 7],
-[7, 4, 6, 1, 7],
-[7, 7, 7, 7, 7],
-]
+world_data = []
+
+# dummy data to populate the list so it is not empty
+for row in range(constants.ROWS):
+  r = [-1] * constants.COLS
+  world_data.append(r)
+
+# overwrites dummy data with actual level
+with open(f"levels/level{level}_data.csv", newline="") as csvfile:
+  reader = csv.reader(csvfile, delimiter=",")
+  for x, row in enumerate(reader):
+    for y, tile in enumerate(row):
+      world_data[x][y] = int(tile)
+
+
 
 world = World()
 world.process_data(world_data, tile_list)
@@ -212,11 +225,11 @@ while run:
     dy = constants.PLAYER_SPEED
 
 
-  # moves player
-  player.move(dx, dy)
+  # moves player and stores screen scroll returned value
+  screen_scroll = player.move(dx, dy)
+  print(screen_scroll)
 
-
-# updates enemy animated state
+  # updates enemy animated state
   for enemy in enemy_list:
     enemy.update()
 

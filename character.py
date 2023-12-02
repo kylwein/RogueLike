@@ -22,6 +22,8 @@ class Character():
 
 
     def move(self, dx, dy):
+        screen_scroll = [0, 0]
+
         # makes it so player does not move twice as fast in diagonal
         if dx != 0 and dy != 0:
             dx = dx * math.sqrt(2)/2
@@ -44,6 +46,16 @@ class Character():
             self.move_state = 0
         else:
             self.move_state = 1
+
+        # screen only scrolls around player
+        if self.mob_type == 0:
+            # moves camera left/right
+            if self.rect.right > (constants.SCREEN_WIDTH - constants.SCROLL_THRESH):
+                screen_scroll[0] = (constants.SCREEN_WIDTH - constants.SCROLL_THRESH) - self.rect.right
+            if self.rect.left < constants.SCROLL_THRESH:
+                screen_scroll[0] = constants.SCROLL_THRESH - self.rect.left
+
+        return screen_scroll
 
     def update(self):
 
