@@ -163,19 +163,22 @@ class DamageText(pygame.sprite.Sprite):
     self.counter = 0
 
   def update(self):
-    #move damage text up
+    # makes so that the damage display scrolls appropriately
+    self.rect.x += screen_scroll[0]
+    self.rect.y += screen_scroll[1]
+    # moves damage text up
     self.rect.y -= 1
-    # delete the counter after time
+    # deletes the counter after time
     self.counter += 1
-    if self.counter >30:
+    if self.counter > 30:
       self.kill()
 
 
 # creates our hero!
-player = Character(100, 100, 100, mob_animations, 0)
+player = Character(400, 300, 100, mob_animations, 0)
 
-# create our first monster
-enemy = Character(200, 300, 100, mob_animations, 1) # imp character
+# create our first monster // set enemy hp to 1 for now
+enemy = Character(600, 300, 1, mob_animations, 1) # imp character
 
 #monster list
 enemy_list = []
@@ -189,7 +192,7 @@ damage_text_group = pygame.sprite.Group()
 projectile_group = pygame.sprite.Group()
 item_group = pygame.sprite.Group()
 
-score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_frames)
+score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_frames, True)
 
 potion = Item(200, 200, 1, pwr_up)
 item_group.add(potion)
@@ -204,11 +207,11 @@ item_group.add(coin)
 run = True # GAME LOOP
 while run:
 
-  # sets frame rate
+  # sets frame rate and screen background color
   clock.tick(constants.FPS)
-  # sets screen background - find a way to make it a map
   screen.fill(constants.BACKGROUND)
 
+  # can be deleted later
   draw_grid()
 
   # change in x and y
@@ -227,46 +230,46 @@ while run:
 
   # moves player and stores screen scroll returned value
   screen_scroll = player.move(dx, dy)
-  print(screen_scroll)
 
+
+  # ** UPDATE METHODS **
+  # updates the level tileset
+  world.update(screen_scroll)
   # updates enemy animated state
   for enemy in enemy_list:
+    enemy.ai(screen_scroll)
     enemy.update()
-
   # updates player animated state
   player.update()
+  # updates projectile state
   projectile = pistol.update(player)
   if projectile:
     projectile_group.add(projectile)
+  # working collision of projectiles with enemies
   for projectile in projectile_group:
-    damage, damage_pos = projectile.update(enemy_list)
+    damage, damage_pos = projectile.update(screen_scroll, enemy_list)
     if damage:
       damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
       damage_text_group.add(damage_text)
   damage_text_group.update()
+  # scrolls screen while keeping items where they belong
+  item_group.update(screen_scroll, player)
 
-  item_group.update(player)
-
-  print(projectile_group)
 
   # ** DRAW METHODS **
   # creates the level tileset
   world.draw(screen)
-
   # displays the enemy
   for enemy in enemy_list:
     enemy.draw(screen)
-
   # displays the player (Jason!), weapon, and items
   player.draw(screen)
   pistol.draw(screen)
-
-  # prpjectiles (weapon bullets, etc)
+  item_group.draw(screen)
+  # displays projectiles (weapon bullets, etc)
   for projectile in projectile_group:
     projectile.draw(screen)
   damage_text_group.draw(screen)
-  item_group.draw(screen)
-
   # draws top part of screen with hp, text, coin sprite
   game_info()
   score_coin.draw(screen)

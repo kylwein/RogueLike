@@ -19,7 +19,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 # used to control screen scrolling
-SCROLL_THRESH = 200
+SCROLL_THRESH = 250
 
 # colors :)
 RED = (255, 0, 0)

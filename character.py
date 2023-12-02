@@ -42,6 +42,7 @@ class Character():
         self.rect.x += dx
         self.rect.y += dy
 
+        # if player is moving, display running animation
         if dx == 0 and dy == 0:
             self.move_state = 0
         else:
@@ -49,13 +50,28 @@ class Character():
 
         # screen only scrolls around player
         if self.mob_type == 0:
-            # moves camera left/right
+            # scrolls camera left/right
             if self.rect.right > (constants.SCREEN_WIDTH - constants.SCROLL_THRESH):
                 screen_scroll[0] = (constants.SCREEN_WIDTH - constants.SCROLL_THRESH) - self.rect.right
+                self.rect.right = constants.SCREEN_WIDTH - constants.SCROLL_THRESH
             if self.rect.left < constants.SCROLL_THRESH:
                 screen_scroll[0] = constants.SCROLL_THRESH - self.rect.left
+                self.rect.left = constants.SCROLL_THRESH
+
+            # scrolls camera up/down
+            if self.rect.bottom > (constants.SCREEN_HEIGHT - constants.SCROLL_THRESH):
+                screen_scroll[1] = (constants.SCREEN_HEIGHT - constants.SCROLL_THRESH) - self.rect.bottom
+                self.rect.bottom = constants.SCREEN_HEIGHT - constants.SCROLL_THRESH
+            if self.rect.top < constants.SCROLL_THRESH:
+                screen_scroll[1] = constants.SCROLL_THRESH - self.rect.top
+                self.rect.top = constants.SCROLL_THRESH
 
         return screen_scroll
+
+    def ai(self, screen_scroll):
+        # moves the enemies based on the screen scrolling
+        self.rect.x += screen_scroll[0]
+        self.rect.y += screen_scroll[1]
 
     def update(self):
 
