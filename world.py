@@ -26,8 +26,8 @@ class World():
                 # 8 represents exit
                 elif tile == 8:
                     self.ladder_tile = tile_data
-                elif tile == 9:
-                    coin = Item(image_x, image_y, 0, )
+                #elif tile == 9:
+                    #coin = Item(image_x, image_y, 0, )
                 # adds the single tile to the map tiles list
                 # no negative images so must be positive value
                 if tile >= 0:
