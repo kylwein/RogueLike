@@ -92,6 +92,8 @@ all_items.append(pwr_up)
 # loads all weapons
 pistol_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha()
 pistol_image = scale_image(pistol_img, constants.WEAPON_SCALE)
+fireball_image = scale_image(pygame.image.load("assets/images/weapons/fireball.png").convert_alpha(), constants.FIREBALL_SCALE)
+
 
 # loads ammo projectile
 projectile_img = pygame.image.load("assets/images/weapons/blue_lightsaber.png").convert_alpha()
@@ -153,7 +155,7 @@ def game_info():
   draw_text("LEVEL: " + str(level), font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
 
   #draw wallet ***change how money is displayed
-  draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 150, 15)
+  draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 145, 15)
 
 
 # tileset creation for level
@@ -170,7 +172,6 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
   for x, row in enumerate(reader):
     for y, tile in enumerate(row):
       world_data[x][y] = int(tile)
-
 
 
 world = World()
@@ -221,6 +222,7 @@ enemy_list = world.all_enemies
 damage_text_group = pygame.sprite.Group()
 projectile_group = pygame.sprite.Group()
 item_group = pygame.sprite.Group()
+fireball_group = pygame.sprite.Group()
 
 score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_frames, True)
 item_group.add(score_coin)
@@ -272,8 +274,11 @@ while run:
   world.update(screen_scroll)
   # updates enemy animated state
   for enemy in enemy_list:
-    enemy.ai(screen_scroll)
-    enemy.update()
+    fireball = enemy.ai(player, world.wall_tiles, screen_scroll, fireball_image)
+    if fireball:
+      fireball_group.add(fireball)
+    if enemy.alive:
+      enemy.update()
   # updates player animated state
   player.update()
   # updates projectile state
@@ -283,12 +288,13 @@ while run:
     projectile_fx.play()
   # working collision of projectiles with enemies
   for projectile in projectile_group:
-    damage, damage_pos = projectile.update(screen_scroll, enemy_list)
+    damage, damage_pos = projectile.update(screen_scroll, world.wall_tiles, enemy_list)
     if damage:
       damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
       damage_text_group.add(damage_text)
       hit_fx.play()
   damage_text_group.update()
+  fireball_group.update(screen_scroll, player)
   # scrolls screen while keeping items where they belong
   item_group.update(screen_scroll, player, coin_fx, potion_fx)
 
@@ -306,6 +312,8 @@ while run:
   # displays projectiles (weapon bullets, etc)
   for projectile in projectile_group:
     projectile.draw(screen)
+  for fireball in fireball_group:
+    fireball.draw(screen)
   damage_text_group.draw(screen)
   # draws top part of screen with hp, text, coin sprite
   game_info()

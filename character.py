@@ -1,4 +1,5 @@
 import pygame
+import weapon
 import constants
 import math
 
@@ -14,7 +15,11 @@ class Character():
         self.update_time = pygame.time.get_ticks() # time since frame updated
         self.health = health
         self.alive = True
+        self.hit = False
+        self.last_hit = pygame.time.get_ticks()
+        self.last_attack = pygame.time.get_ticks()
         self.money = 0
+        self.stunned = False
 
         # image stuff :)
         self.image = self.animation_list[self.move_state][self.frame_index]
@@ -37,6 +42,7 @@ class Character():
         if x_dist > 0:
             self.flip = False
         if x_dist < 0:
+            self.flip = True
             self.flip = True
 
 
@@ -91,16 +97,83 @@ class Character():
 
         return screen_scroll
 
-    def ai(self, screen_scroll):
+    def ai(self, player, wall_tiles, screen_scroll, fireball_image):
+        clipped_line = ()
+        stun_cooldown = 100
+        ai_dx = 0
+        ai_dy = 0
+        fireball = None
         # moves the enemies based on the screen scrolling
         self.rect.x += screen_scroll[0]
         self.rect.y += screen_scroll[1]
+
+        line_of_sight = ((self.rect.centerx, self.rect.centery), (player.rect.centerx, player.rect.centery))
+        for wall in wall_tiles:
+            if wall[1].clipline(line_of_sight):
+                clipped_line = wall[1].clipline(line_of_sight)
+
+
+        #check distance to player
+        dist = math.sqrt(((self.rect.centerx - player.rect.centerx)** 2) + ((self.rect.centery - player.rect.centery)**2))
+        if not clipped_line and dist > constants.RANGE:
+            if self.rect.centerx > player.rect.centerx: #right hand side
+                ai_dx = -constants.ENEMY_SPEED
+            if self.rect.centerx < player.rect.centerx: #left hand side
+                ai_dx = constants.ENEMY_SPEED
+            if self.rect.centery > player.rect.centery: #below
+                ai_dy = -constants.ENEMY_SPEED
+            if self.rect.centery < player.rect.centery: #above
+                ai_dy = constants.ENEMY_SPEED
+
+        if self.alive:
+
+            if not self.stunned:
+                self.move(ai_dx, ai_dy, wall_tiles)
+
+                if dist < constants.ATTACK_RANGE and player.hit == False:
+                    player.health -= 10
+                    player.hit = True
+                    player.last_hit = pygame.time.get_ticks()
+                # boss enemies shoot fireballs
+                fireball_cooldown = 700
+                if self.boss_enemy:
+                    if dist < 500:
+                        if pygame.time.get_ticks() - self.last_attack >= fireball_cooldown:
+                            fireball = weapon.Fireball(fireball_image, self.rect.centerx, self.rect.centery, player.rect.centerx, player.rect.centery)
+                            self.last_attack = pygame.time.get_ticks()
+
+            if self.hit == True:
+                self.hit = False
+                self.last_hit = pygame.time.get_ticks()
+                self.stunned = True
+                self. move_state = 0
+              #  self.update_action(0)
+            # idle animation not implemented yet
+
+            if (pygame.time.get_ticks() - self.last_hit > stun_cooldown):
+                self.stunned = False
+
+        return fireball
+
+
+
+
+
 
     def update(self):
 
         if self.health <= 0: #see if your dead
             self.health = 0
             self.alive = False
+
+    # timer to reset hit
+
+        hit_cooldown = 1000
+        if self.mob_type == 0:
+            if self.hit == True:
+                if pygame.time.get_ticks() - self.last_hit > hit_cooldown:
+                    self.hit = False
+
 
 
         # sets current character frame state -- idle version
@@ -123,4 +196,3 @@ class Character():
         else:
             if self.alive:
                 surface.blit(flipped_image, self.rect)
-                pygame.draw.rect(surface, constants.RED, self.rect, 1)
