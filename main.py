@@ -153,7 +153,7 @@ def game_info():
   draw_text("LEVEL: " + str(level), font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
 
   #draw wallet ***change how money is displayed
-  draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 150, 15)
+  draw_text(f"X {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 75, 15)
 
 
 # tileset creation for level
