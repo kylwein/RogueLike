@@ -12,7 +12,7 @@ class Item(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.static = static
 
-    def update(self, screen_scroll, player):
+    def update(self, screen_scroll, player, coin_fx, potion_fx):
         # repositions item if the screen moves
         if not self.static:
             self.rect.x += screen_scroll[0]
@@ -22,10 +22,12 @@ class Item(pygame.sprite.Sprite):
         if self.rect.colliderect(player.rect):
             if self.item == 0:
                 player.money += 1
+                coin_fx.play()
             elif self.item == 1:
                 player.health += 10
+                potion_fx.play()
                 if player.health > 100:
-                    player.health == 100
+                    player.health = 100
             self.kill()
 
         # animates the item

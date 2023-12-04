@@ -1,4 +1,5 @@
 import pygame
+from pygame import mixer
 import csv
 import constants
 from character import Character
@@ -11,8 +12,10 @@ from world import World
 # ( ) Fix enemy hitbox
 # ( ) Make potion have 4 total frames, so it is animated
 # ( ) Tweak Enemy Health and Hitbox arguments
+# ( ) Find other Music/Sounds effects
 
-# initializes pygame
+# initializes pygame and music mixer
+mixer.init()
 pygame.init()
 
 # sets screen dimensions
@@ -31,6 +34,26 @@ moving_down = False
 # defines which level to load from csv
 level = 2
 screen_scroll = [0, 0]
+
+# -- SOUNDS AND MUSIC --
+# load music and sounds
+pygame.mixer.music.load("assets/audio/music.wav")
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(-1, 0.0, 5000)
+
+# *** change this based on weapon held
+projectile_fx = pygame.mixer.Sound("assets/audio/arrow_shot.mp3")
+projectile_fx.set_volume(0.5)
+
+hit_fx = pygame.mixer.Sound("assets/audio/arrow_hit.wav")
+hit_fx.set_volume(0.5)
+
+coin_fx = pygame.mixer.Sound("assets/audio/coin.wav")
+coin_fx.set_volume(0.5)
+
+potion_fx = pygame.mixer.Sound("assets/audio/heal.wav")
+potion_fx.set_volume(0.5)
+
 
 #define font!!
 font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
@@ -257,15 +280,17 @@ while run:
   projectile = pistol.update(player)
   if projectile:
     projectile_group.add(projectile)
+    projectile_fx.play()
   # working collision of projectiles with enemies
   for projectile in projectile_group:
     damage, damage_pos = projectile.update(screen_scroll, enemy_list)
     if damage:
       damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
       damage_text_group.add(damage_text)
+      hit_fx.play()
   damage_text_group.update()
   # scrolls screen while keeping items where they belong
-  item_group.update(screen_scroll, player)
+  item_group.update(screen_scroll, player, coin_fx, potion_fx)
 
 
   # ** DRAW METHODS **
