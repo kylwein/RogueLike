@@ -3,8 +3,10 @@ import constants
 import math
 
 class Character():
-    def __init__(self, x, y, health, mob_animations, mob_type):
+    def __init__(self, x, y, health, mob_animations, mob_type, boss_enemy, size):
         self.mob_type = mob_type
+        self.boss_enemy = boss_enemy
+
         self.flip = False
         self.animation_list = mob_animations[mob_type]
         self.frame_index = 0 # index to change sprite states
@@ -14,14 +16,13 @@ class Character():
         self.alive = True
         self.money = 0
 
-
         # image stuff :)
         self.image = self.animation_list[self.move_state][self.frame_index]
-        self.rect = pygame.Rect(0, 0, constants.TILE_SIZE, constants.TILE_SIZE) # makes player same size as tile
-        self.rect.center = (x, y)
+        self.rect = pygame.Rect(0, 0, constants.TILE_SIZE * size, constants.TILE_SIZE * size) # hitbox
+        self.rect.center = (x, y) # center of hitbox
 
 
-    def move(self, dx, dy):
+    def move(self, dx, dy, wall_tiles):
         screen_scroll = [0, 0]
 
         # makes it so player does not move twice as fast in diagonal
@@ -38,9 +39,31 @@ class Character():
         if x_dist < 0:
             self.flip = True
 
-        # updates player pos
+
         self.rect.x += dx
+        # check if player is touching a wall
+        for wall in wall_tiles:
+            # verify wall and player collision
+            if wall[1].colliderect(self.rect):
+                # check which side collision occured
+                if dx > 0:
+                    self.rect.right = wall[1].left
+                if dx < 0:
+                    self.rect.left = wall[1].right
+
+
         self.rect.y += dy
+        # check if player is touching a wall
+        for wall in wall_tiles:
+            # verify wall and player collision
+            if wall[1].colliderect(self.rect):
+                # check which side collision occured
+                if dy > 0:
+                    self.rect.bottom = wall[1].top
+                elif dy < 0:
+                    self.rect.top = wall[1].bottom
+
+
 
         # if player is moving, display running animation
         if dx == 0 and dy == 0:

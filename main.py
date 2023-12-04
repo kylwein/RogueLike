@@ -9,8 +9,8 @@ from world import World
 
 # *** ADDITIONAL TO DO LIST ***
 # ( ) Fix enemy hitbox
-
-
+# ( ) Make potion have 4 total frames, so it is animated
+# ( ) Tweak Enemy Health and Hitbox arguments
 
 # initializes pygame
 pygame.init()
@@ -60,6 +60,11 @@ pwr_up = []
 for i in range(4):
   image = scale_image(pygame.image.load("assets/images/items/potion_red.png").convert_alpha(), constants.ITEM_SCALE)
   pwr_up.append(image)
+
+all_items = []
+all_items.append(coin_frames)
+all_items.append(pwr_up)
+
 
 # loads all weapons
 pistol_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha()
@@ -146,7 +151,7 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
 
 
 world = World()
-world.process_data(world_data, tile_list)
+world.process_data(world_data, tile_list, all_items, mob_animations)
 
 
 
@@ -180,18 +185,14 @@ class DamageText(pygame.sprite.Sprite):
       self.kill()
 
 
-# creates our hero!
-player = Character(400, 300, 100, mob_animations, 0)
-
-# create our first monster // set enemy hp to 1 for now
-enemy = Character(600, 300, 1, mob_animations, 1) # imp character
-
-#monster list
-enemy_list = []
-enemy_list.append(enemy)
-
-# creates our hero's weapon
+# creates our hero and his weapon!
+player = world.player
 pistol = Weapon(pistol_image, projectile_image)
+
+# gets the enemy list from the world class
+enemy_list = world.all_enemies
+
+
 # creates sprite group for projectiles
 
 damage_text_group = pygame.sprite.Group()
@@ -199,12 +200,17 @@ projectile_group = pygame.sprite.Group()
 item_group = pygame.sprite.Group()
 
 score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_frames, True)
+item_group.add(score_coin)
 
-potion = Item(200, 200, 1, pwr_up)
-item_group.add(potion)
+# loads all items from the world class
+for item in world.all_items:
+  item_group.add(item)
 
-coin = Item(400, 400, 0, coin_frames)
-item_group.add(coin)
+# items are being created in world.py now
+#potion = Item(200, 200, 1, pwr_up)
+#item_group.add(potion)
+#coin = Item(400, 400, 0, coin_frames)
+#item_group.add(coin)
 
 # creates an enemy
 #enemy = Character(100, 100, mob_animations, 1)
@@ -235,7 +241,7 @@ while run:
 
 
   # moves player and stores screen scroll returned value
-  screen_scroll = player.move(dx, dy)
+  screen_scroll = player.move(dx, dy, world.wall_tiles)
 
 
   # ** UPDATE METHODS **

@@ -1,3 +1,4 @@
+from character import Character
 from item import Item
 import constants
 
@@ -6,8 +7,11 @@ class World():
         self.map_tiles = []
         self.wall_tiles = []
         self.ladder_tile = None
+        self.player = None
+        self.all_items = []
+        self.all_enemies = []
 
-    def process_data(self, data, tile_list):
+    def process_data(self, data, tile_list, item_list, mob_animations):
         self.level_length = len(data)
 
         # creates y and x counter in function definition
@@ -26,8 +30,49 @@ class World():
                 # 8 represents exit
                 elif tile == 8:
                     self.ladder_tile = tile_data
-                #elif tile == 9:
-                    #coin = Item(image_x, image_y, 0, )
+                # 9 represents coins
+                elif tile == 9:
+                    coin = Item(image_x, image_y, 0, item_list[0])
+                    self.all_items.append(coin)
+                    # overrides coin tile with floor tile
+                    tile_data[0] = tile_list[0]
+                # 10 represents potions
+                elif tile == 10:
+                    # item_list[1] is a list of still images as of now
+                    potion = Item(image_x, image_y, 1, item_list[1])
+                    self.all_items.append(potion)
+                    tile_data[0] = tile_list[0]
+                # 11 represents the player
+                elif tile == 11:
+                    player = Character(image_x, image_y, 100, mob_animations, 0, False, 1)
+                    self.player = player
+                    tile_data[0] = tile_list[0]
+                # 12 - 16 are all enemies; 17 is the boss *** tweak HP values and size
+                elif tile == 12:
+                    enemy = Character(image_x, image_y, 10, mob_animations, 1, False, 1)
+                    self.all_enemies.append(enemy)
+                    tile_data[0] = tile_list[0]
+                elif tile == 13:
+                    enemy = Character(image_x, image_y, 10, mob_animations, 2, False, 1)
+                    self.all_enemies.append(enemy)
+                    tile_data[0] = tile_list[0]
+                elif tile == 14:
+                    enemy = Character(image_x, image_y, 10, mob_animations, 3, False, 1)
+                    self.all_enemies.append(enemy)
+                    tile_data[0] = tile_list[0]
+                elif tile == 15:
+                    enemy = Character(image_x, image_y, 10, mob_animations, 4, False, 1)
+                    self.all_enemies.append(enemy)
+                    tile_data[0] = tile_list[0]
+                elif tile == 16:
+                    enemy = Character(image_x, image_y, 10, mob_animations, 5, False, 1)
+                    self.all_enemies.append(enemy)
+                    tile_data[0] = tile_list[0]
+                elif tile == 17:
+                    enemy = Character(image_x, image_y, 100, mob_animations, 6, True, 2)
+                    self.all_enemies.append(enemy)
+                    tile_data[0] = tile_list[0]
+
                 # adds the single tile to the map tiles list
                 # no negative images so must be positive value
                 if tile >= 0:
