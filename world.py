@@ -24,6 +24,8 @@ class World():
                 image_rect.center = (image_x, image_y)
                 tile_data = [image, image_rect, image_x, image_y]
 
+
+
                 # 7 represents wall
                 if tile == 7:
                     self.wall_tiles.append(tile_data)
