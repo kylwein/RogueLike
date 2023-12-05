@@ -90,7 +90,7 @@ all_items = []
 all_items.append(coin_frames)
 all_items.append(pwr_up)
 
-# loads all weapons
+# loads weapons
 pistol_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha()
 pistol_image = scale_image(pistol_img, constants.WEAPON_SCALE)
 fireball_image = scale_image(pygame.image.load("assets/images/weapons/fireball.png").convert_alpha(),
@@ -246,7 +246,7 @@ while run:
 
     # can be deleted later
     draw_grid()
-
+    
     # change in x and y
     dx = 0
     dy = 0
