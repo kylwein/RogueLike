@@ -14,7 +14,7 @@ import numpy as np
 # ( ) Make potion have 4 total frames, so it is animated
 # ( ) Tweak Enemy Health and Hitbox arguments
 # ( ) Find other Music/Sounds effects
-# ( ) Fix character field of view orientation (following mouse cursor)
+# (X) Fix character field of view orientation (following mouse cursor)
 
 # initializes pygame and music mixer
 mixer.init()

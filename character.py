@@ -35,16 +35,20 @@ class Character():
             dx = dx * math.sqrt(2)/2
             dy = dy * math.sqrt(2)/2
 
-        # faces the player where the cursor is
-        pos = pygame.mouse.get_pos()
-        x_dist = pos[0] - self.rect.centerx
+        # faces the main player where the cursor is
+        if self.mob_type == 0:
+            pos = pygame.mouse.get_pos()
+            x_dist = pos[0] - self.rect.centerx
 
-        if x_dist > 0:
-            self.flip = False
-        if x_dist < 0:
-            self.flip = True
-            self.flip = True
-
+            if x_dist > 0:
+                self.flip = False
+            if x_dist < 0:
+                self.flip = True
+        else:
+            if dx > 0:
+                self.flip = False
+            if dx < 0:
+                self.flip = True
 
         self.rect.x += dx
         # check if player is touching a wall
