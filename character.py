@@ -26,7 +26,7 @@ class Character():
         self.rect = pygame.Rect(0, 0, constants.TILE_SIZE * size, constants.TILE_SIZE * size) # hitbox
         self.rect.center = (x, y) # center of hitbox
 
-        # for NPCs so they do not move
+        # used so the NPCs stay still
         self.static = static
 
 
@@ -76,8 +76,6 @@ class Character():
                 elif dy < 0:
                     self.rect.top = wall[1].bottom
 
-
-
         # if player is moving, display running animation
         if dx == 0 and dy == 0:
             self.move_state = 0
@@ -119,20 +117,19 @@ class Character():
             if wall[1].clipline(line_of_sight):
                 clipped_line = wall[1].clipline(line_of_sight)
 
-
-        #check distance to player
+        # checks distance to player
         dist = math.sqrt(((self.rect.centerx - player.rect.centerx)** 2) + ((self.rect.centery - player.rect.centery)**2))
         if not clipped_line and dist > constants.RANGE:
-            if self.rect.centerx > player.rect.centerx: #right hand side
+            if self.rect.centerx > player.rect.centerx: # right hand side
                 ai_dx = -constants.ENEMY_SPEED
-            if self.rect.centerx < player.rect.centerx: #left hand side
+            if self.rect.centerx < player.rect.centerx: # left hand side
                 ai_dx = constants.ENEMY_SPEED
-            if self.rect.centery > player.rect.centery: #below
+            if self.rect.centery > player.rect.centery: # below
                 ai_dy = -constants.ENEMY_SPEED
-            if self.rect.centery < player.rect.centery: #above
+            if self.rect.centery < player.rect.centery: # above
                 ai_dy = constants.ENEMY_SPEED
 
-        if self.alive:
+        if self.alive and not self.static:
 
             if not self.stunned:
                 self.move(ai_dx, ai_dy, wall_tiles)
@@ -171,8 +168,7 @@ class Character():
             self.alive = False
 
     # timer to reset hit
-
-        hit_cooldown = 1000
+        hit_cooldown = 500
         if self.mob_type == 0:
             if self.hit == True:
                 if pygame.time.get_ticks() - self.last_hit > hit_cooldown:

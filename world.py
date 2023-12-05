@@ -22,16 +22,12 @@ class World():
         for y, row in enumerate(data):
             for x, tile in enumerate(row):
 
-
-
                 image = tile_list[tile]
                 image_rect = image.get_rect()
                 image_x = x * constants.TILE_SIZE
                 image_y = y * constants.TILE_SIZE
                 image_rect.center = (image_x, image_y)
                 tile_data = [image, image_rect, image_x, image_y]
-
-
 
                 # 7 represents wall
                 if tile == 7:
@@ -82,7 +78,7 @@ class World():
                     self.all_enemies.append(enemy)
                     tile_data[0] = tile_list[0]
                 elif tile == 18: # merchant
-                    npc = Character(image_x, image_y, 100, mob_animations, 6, True, 1, True)
+                    npc = Character(image_x, image_y, 1, mob_animations, 7, True, 1, True)
                     self.all_npcs.append(npc)
                     tile_data[0] = tile_list[0]
 
