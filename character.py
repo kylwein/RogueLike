@@ -4,7 +4,7 @@ import constants
 import math
 
 class Character():
-    def __init__(self, x, y, health, mob_animations, mob_type, boss_enemy, size):
+    def __init__(self, x, y, health, mob_animations, mob_type, boss_enemy, size, static = False):
         self.mob_type = mob_type
         self.boss_enemy = boss_enemy
 
@@ -25,6 +25,9 @@ class Character():
         self.image = self.animation_list[self.move_state][self.frame_index]
         self.rect = pygame.Rect(0, 0, constants.TILE_SIZE * size, constants.TILE_SIZE * size) # hitbox
         self.rect.center = (x, y) # center of hitbox
+
+        # for NPCs so they do not move
+        self.static = static
 
 
     def move(self, dx, dy, wall_tiles):
@@ -161,9 +164,6 @@ class Character():
 
 
 
-
-
-
     def update(self):
 
         if self.health <= 0: #see if your dead
@@ -177,8 +177,6 @@ class Character():
             if self.hit == True:
                 if pygame.time.get_ticks() - self.last_hit > hit_cooldown:
                     self.hit = False
-
-
 
         # sets current character frame state -- idle version
         self.image = self.animation_list[self.move_state][self.frame_index]

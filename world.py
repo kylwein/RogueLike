@@ -10,6 +10,7 @@ class World():
         self.player = None
         self.all_items = []
         self.all_enemies = []
+        self.all_npcs = []
 
     # "data" comes from the csv file, -1, 0, 1...
     # "tile_list" has images for the associated numbers in "data"
@@ -79,6 +80,10 @@ class World():
                 elif tile == 17:
                     enemy = Character(image_x, image_y, 100, mob_animations, 6, True, 2)
                     self.all_enemies.append(enemy)
+                    tile_data[0] = tile_list[0]
+                elif tile == 18: # merchant
+                    npc = Character(image_x, image_y, 100, mob_animations, 6, True, 1, True)
+                    self.all_npcs.append(npc)
                     tile_data[0] = tile_list[0]
 
                 # adds the single tile to the map tiles list

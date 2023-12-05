@@ -34,7 +34,7 @@ moving_up = False
 moving_down = False
 
 # defines which level to load from csv
-level = 50
+level = 51
 screen_scroll = [0, 0]
 
 # -- SOUNDS AND MUSIC --
@@ -112,7 +112,7 @@ for x in range(constants.DIFF_TILES + 1): # addresses out of bounds error
 
 # loads all mob entities
 mob_animations = []
-mob_types = ["jason", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon"]
+mob_types = ["jason", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon", "merchant"]
 animation_types = ["idle", "run"]
 
 for mob in mob_types:
@@ -215,7 +215,6 @@ class DamageText(pygame.sprite.Sprite):
     if self.counter > 30:
       self.kill()
 
-
 # creates our hero and his weapon!
 player = world.player
 pistol = Weapon(pistol_image, projectile_image)
@@ -223,9 +222,10 @@ pistol = Weapon(pistol_image, projectile_image)
 # gets the enemy list from the world class
 enemy_list = world.all_enemies
 
+# gets the npc list from the world class
+npc_list = world.all_npcs
 
 # creates sprite group for projectiles
-
 damage_text_group = pygame.sprite.Group()
 projectile_group = pygame.sprite.Group()
 item_group = pygame.sprite.Group()
@@ -237,12 +237,6 @@ item_group.add(score_coin)
 # loads all items from the world class
 for item in world.all_items:
   item_group.add(item)
-
-# items are being created in world.py now
-#potion = Item(200, 200, 1, pwr_up)
-#item_group.add(potion)
-#coin = Item(400, 400, 0, coin_frames)
-#item_group.add(coin)
 
 # creates an enemy
 #enemy = Character(100, 100, mob_animations, 1)
