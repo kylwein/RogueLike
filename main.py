@@ -35,7 +35,9 @@ moving_down = False
 
 # defines which level to load from csv
 level = 99
+start_intro = True
 screen_scroll = [0, 0]
+
 
 # -- SOUNDS AND MUSIC --
 # load music and sounds
@@ -162,7 +164,27 @@ def game_info():
     draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 150, 15)
     draw_text(f"X {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 75, 15)
 
-
+#creates class for screenfading
+class ScreenFade():
+    def __init__(self, direction, color, speed):
+        self.direction = direction
+        self.color = color
+        self.speed = speed
+        self.fade_counter = 0
+        
+    def fade(self):
+        fade_complete = False
+        self.fade_counter += self.speed
+        if self.direction ==1:
+            pygame.draw.rect(screen, self.color,(0 - self.fade_counter,0, contants.SCREEN_WIDTH //2, constants.SCREEN_HEIGHT))
+            pygame.draw.rect(screen, self.color,(contants.SCREEN_WIDTH //2 + self.fade_counter, 0, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+            pygame.draw.rect(screen, self.color,(0,0 - self.fade_counter, contants.SCREEN_WIDTH, constants.SCREEN_HEIGHT//2))
+            pygame.draw.rect(screen, self.color,(0, constants.SCREEN_HEIGHT//2 + self.fade_counter,contants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+        
+        if self.fade_counter >= constants.SCREEN_WIDTH:
+            fade_complete = True
+        return fade_complete
+                
 # tileset creation for level
 world_data = []
 
@@ -235,6 +257,9 @@ item_group.add(score_coin)
 # loads all items from the world class
 for item in world.all_items:
     item_group.add(item)
+
+#creates actual Screenfade
+intro_fade = ScreenFade(1, constants.BLACK, 4)
 
 # keeps window open till user closes it
 run = True  # GAME LOOP
@@ -330,10 +355,21 @@ while run:
     game_info()
     score_coin.draw(screen)
 
+#checks to see if level is complete
+    if level_complete == True:
+        start_intro = True
+        level ==1
+        
+        #there's a bunch of code here having to do with levels
 
-
-
-
+#show intro
+    if start_intro == True:
+        if intro_fade.fade():
+            start_intro = False
+            intro_fade.fade_counter = 0
+            
+    
+    
     # event handler
     for event in pygame.event.get():
 
