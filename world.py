@@ -11,12 +11,18 @@ class World():
         self.all_items = []
         self.all_enemies = []
 
+    # "data" comes from the csv file, -1, 0, 1...
+    # "tile_list" has images for the associated numbers in "data"
     def process_data(self, data, tile_list, item_list, mob_animations):
         self.level_length = len(data)
+
 
         # creates y and x counter in function definition
         for y, row in enumerate(data):
             for x, tile in enumerate(row):
+
+
+
                 image = tile_list[tile]
                 image_rect = image.get_rect()
                 image_x = x * constants.TILE_SIZE

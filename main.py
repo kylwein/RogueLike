@@ -7,6 +7,7 @@ from weapon import Weapon
 from item import Item
 from world import World
 
+import numpy as np
 
 # *** ADDITIONAL TO DO LIST ***
 # ( ) Fix enemy hitbox
@@ -32,7 +33,7 @@ moving_up = False
 moving_down = False
 
 # defines which level to load from csv
-level = 2
+level = 3
 screen_scroll = [0, 0]
 
 # -- SOUNDS AND MUSIC --
@@ -102,7 +103,7 @@ projectile_image = scale_image(projectile_img, constants.WEAPON_SCALE)
 
 # creates our level tileset
 tile_list = []
-for x in range(constants.DIFF_TILES):
+for x in range(constants.DIFF_TILES + 1): # addresses out of bounds error
   tile_image = pygame.image.load(f"assets/images/tiles/{x}.png").convert_alpha()
   tile_image = pygame.transform.scale(tile_image, (constants.TILE_SIZE, constants.TILE_SIZE))
   tile_list.append(tile_image)
@@ -129,6 +130,7 @@ for mob in mob_types:
     temp_mob_list.append(temp_action_list)
 
   mob_animations.append(temp_mob_list)
+
 
 # draws text onto screen
 def draw_text(text, font, color, x, y):
@@ -175,6 +177,7 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
   for x, row in enumerate(reader):
     for y, tile in enumerate(row):
       world_data[x][y] = int(tile)
+
 
 
 world = World()
