@@ -7,7 +7,10 @@ from weapon import Weapon
 from item import Item
 from world import World
 
-import numpy as np
+from wave import WaveFunctionCollapse
+
+wave = WaveFunctionCollapse()
+random_level = wave.collapse(20, 10)
 
 # *** ADDITIONAL TO DO LIST ***
 # ( ) Fix enemy hitbox
@@ -15,6 +18,7 @@ import numpy as np
 # ( ) Tweak Enemy Health and Hitbox arguments
 # ( ) Find other Music/Sounds effects
 # (X) Fix character field of view orientation (following mouse cursor)
+# ( ) Fix Merchant Spawn position (spawning a tile too low)
 
 # initializes pygame and music mixer
 mixer.init()
@@ -34,25 +38,31 @@ moving_up = False
 moving_down = False
 
 # defines which level to load from csv
-level = 99
+level = 1
 screen_scroll = [0, 0]
 
-# -- SOUNDS AND MUSIC --
-# load music and sounds
+# ----------------------------------------------------
+# |                 Sounds Effects                   |
+# ----------------------------------------------------
+
+# music
 pygame.mixer.music.load("assets/audio/music.wav")
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1, 0.0, 5000)
 
-# *** change this based on weapon held
+# projectile shot sound
 projectile_fx = pygame.mixer.Sound("assets/audio/arrow_shot.mp3")
 projectile_fx.set_volume(0.5)
 
+# enemy is hit
 hit_fx = pygame.mixer.Sound("assets/audio/arrow_hit.wav")
 hit_fx.set_volume(0.5)
 
+# coin is collected
 coin_fx = pygame.mixer.Sound("assets/audio/coin.wav")
 coin_fx.set_volume(0.5)
 
+# potion is collected
 potion_fx = pygame.mixer.Sound("assets/audio/heal.wav")
 potion_fx.set_volume(0.5)
 
@@ -66,51 +76,53 @@ def scale_image(image, scale):
     h = image.get_height()
     return pygame.transform.scale(image, (w * scale, h * scale))
 
+# ----------------------------------------------------
+# |                   Loads Items                    |
+# ----------------------------------------------------
 
-# ** LOADS ITEMS **
-# loads heart
+# hearts
 empty_heart = scale_image(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(),
                           constants.ITEM_SCALE)
-half_heart = scale_image(pygame.image.load("assets/images/items/heart_half.png").convert_alpha(), constants.ITEM_SCALE)
-full_heart = scale_image(pygame.image.load("assets/images/items/heart_full.png").convert_alpha(), constants.ITEM_SCALE)
-
-# loads coin
+half_heart = scale_image(pygame.image.load("assets/images/items/heart_half.png").convert_alpha(),
+                         constants.ITEM_SCALE)
+full_heart = scale_image(pygame.image.load("assets/images/items/heart_full.png").convert_alpha(),
+                         constants.ITEM_SCALE)
+# coin
 coin_frames = []
 for i in range(4):
     image = scale_image(pygame.image.load(f"assets/images/items/coin_f{i}.png").convert_alpha(), constants.ITEM_SCALE)
     coin_frames.append(image)
 
-# load consumables
+# consumables (eg. potion)
 pwr_up = []
 for i in range(4):
     image = scale_image(pygame.image.load("assets/images/items/potion_red.png").convert_alpha(), constants.ITEM_SCALE)
     pwr_up.append(image)
 
-all_items = []
-all_items.append(coin_frames)
-all_items.append(pwr_up)
+# creates list with the created items
+all_items = [coin_frames, pwr_up]
 
-# loads all weapons
+# weapons
 pistol_img = pygame.image.load("assets/images/weapons/pistol.png").convert_alpha()
 pistol_image = scale_image(pistol_img, constants.WEAPON_SCALE)
 fireball_image = scale_image(pygame.image.load("assets/images/weapons/fireball.png").convert_alpha(),
                              constants.FIREBALL_SCALE)
-
-# loads ammo projectile
+# player projectiles
 projectile_img = pygame.image.load("assets/images/weapons/blue_lightsaber.png").convert_alpha()
 projectile_image = scale_image(projectile_img, constants.WEAPON_SCALE)
 
-# creates our level tileset
+# mob entities
+mob_animations = []
+mob_types = ["jason", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon", "merchant"]
+animation_types = ["idle", "run"]
+
+# creates our level tile set
 tile_list = []
 for x in range(constants.DIFF_TILES + 1):  # addresses out of bounds error
     tile_image = pygame.image.load(f"assets/images/tiles/{x}.png").convert_alpha()
     tile_image = pygame.transform.scale(tile_image, (constants.TILE_SIZE, constants.TILE_SIZE))
     tile_list.append(tile_image)
 
-# loads all mob entities
-mob_animations = []
-mob_types = ["jason", "imp", "skeleton", "goblin", "muddy", "tiny_zombie", "big_demon", "merchant"]
-animation_types = ["idle", "run"]
 
 for mob in mob_types:
     # clears animation list
@@ -177,6 +189,19 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
     for x, row in enumerate(reader):
         for y, tile in enumerate(row):
             world_data[x][y] = int(tile)
+
+
+# for x, row in enumerate(random_level):
+#     for y, potential in enumerate(row):
+#         tile_type = potential.state.name
+#         if tile_type == "wall":
+#             world_data[x][y] = 7
+#         elif tile_type == "floor":
+#             world_data[x][y] = 0
+#         else:
+#             world_data[x][y] = -1
+#
+# world_data[5][5] = 11
 
 world = World()
 world.process_data(world_data, tile_list, all_items, mob_animations)
@@ -265,9 +290,6 @@ while run:
 
     # ** UPDATE METHODS **
 
-
-
-
     # updates the level tileset
     world.update(screen_scroll)
 
@@ -303,19 +325,16 @@ while run:
     # scrolls screen while keeping items where they belong
     item_group.update(screen_scroll, player, coin_fx, potion_fx)
 
-
-
     # ** DRAW METHODS **
 
     # creates the level tileset
     world.draw(screen)
 
-
     # displays the enemy
     for enemy in enemy_list:
         enemy.draw(screen)
     for npc in npc_list:
-      npc.draw(screen)
+        npc.draw(screen)
     # displays the player (Jason!), weapon, and items
     player.draw(screen)
     pistol.draw(screen)
@@ -329,10 +348,6 @@ while run:
     # draws top part of screen with hp, text, coin sprite
     game_info()
     score_coin.draw(screen)
-
-
-
-
 
     # event handler
     for event in pygame.event.get():

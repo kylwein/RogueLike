@@ -78,9 +78,28 @@ class World():
                     self.all_enemies.append(enemy)
                     tile_data[0] = tile_list[0]
                 elif tile == 18: # merchant
-                    npc = Character(image_x, image_y, 1, mob_animations, 7, True, 1, True)
+                    npc = Character(image_x, image_y, 50, mob_animations, 7, True, 1, True)
                     self.all_npcs.append(npc)
                     tile_data[0] = tile_list[0]
+
+
+                elif tile == 19: # space for another npc
+                    tile_data[0] = tile_list[0]
+
+                elif tile == 20: # space for another npc
+                    tile_data[0] = tile_list[0]
+
+                elif tile > 20 and tile < 30:
+                    self.wall_tiles.append(tile_data)
+
+                # elif tile == 21: # top left
+                # elif tile == 22: # top right
+                # elif tile == 23: # bottom left
+                # elif tile == 24: # bottom right
+                # elif tile == 25: # left wall
+                # elif tile == 26: # right wall
+                # elif tile > 26 and tile < 30: # top walls (1, 2, 3)
+                # elif tile == 30: # bottom wall
 
                 # adds the single tile to the map tiles list
                 # no negative images so must be positive value
