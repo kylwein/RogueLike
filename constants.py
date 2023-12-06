@@ -3,6 +3,7 @@ FPS = 60
 
 # scaling constants
 SCALE = 3
+BUTTON_SCALE = 1
 PLAYER_SCALE = 3
 WEAPON_SCALE = 1.5
 ITEM_SCALE = 3
