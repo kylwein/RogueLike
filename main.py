@@ -42,7 +42,9 @@ level = 2
 screen_scroll = [0, 0]
 
 # game intro animation and whether player completed the level
-start_intro = True
+start_intro = False
+start_game = False
+pause_game = False
 level_complete = False
 
 # ----------------------------------------------------
@@ -85,8 +87,16 @@ def scale_image(image, scale):
 # ----------------------------------------------------
 
 #load button images
+start_image = scale_image(pygame.image.load("assets/images/buttons/button_start.png").convert_alpha(),
+                          constants.BUTTON_SCALE)
+exit_image = scale_image(pygame.image.load("assets/images/buttons/button_exit.png").convert_alpha(),
+                          constants.BUTTON_SCALE)
 restart_image = scale_image(pygame.image.load("assets/images/buttons/button_restart.png").convert_alpha(),
                           constants.BUTTON_SCALE)
+resume_image = scale_image(pygame.image.load("assets/images/buttons/button_resume.png").convert_alpha(),
+                          constants.BUTTON_SCALE)
+
+
 # hearts
 empty_heart = scale_image(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(),
                           constants.ITEM_SCALE)
@@ -298,7 +308,10 @@ death_fade = ScreenFade(2, constants.PINK, 4)
 # |                    Game Loop                     |
 # ----------------------------------------------------
 #create buttons
+start_button = Button(constants.SCREEN_WIDTH //2 -145, constants.SCREEN_HEIGHT//2 - 150, start_image)
+exit_button = Button(constants.SCREEN_WIDTH //2 -110, constants.SCREEN_HEIGHT//2 + 50, exit_image)
 restart_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 50, restart_image)
+resume_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 150, resume_image)
 
 # keeps window open till user closes it
 run = True
@@ -306,154 +319,177 @@ while run:
 
     # sets frame rate and screen background color
     clock.tick(constants.FPS)
-    screen.fill(constants.BACKGROUND)
 
-    # player can't run around after he's dead
-    if player.alive:
-        # change in x and y
-        dx = 0
-        dy = 0
-
-        if moving_right:
-            dx = constants.PLAYER_SPEED
-        if moving_left:
-            dx = -constants.PLAYER_SPEED
-        if moving_up:
-            dy = -constants.PLAYER_SPEED
-        if moving_down:
-            dy = constants.PLAYER_SPEED
-
-        # moves player and stores screen scroll returned value
-        screen_scroll = player.move(dx, dy, world.wall_tiles)
-
-        # ----------------------------------------------------
-        # |                 Update Methods                   |
-        # ----------------------------------------------------
-
-        # level tile set
-        world.update(screen_scroll)
-
-        # enemy animated state
-        for enemy in enemy_list:
-            fireball = enemy.ai(player, world.wall_tiles, screen_scroll, fireball_image)
-            if fireball:
-                fireball_group.add(fireball)
-            if enemy.alive:
-                enemy.update()
-
-        # non-playable characters (npcs) such as the Merchant
-        for npc in npc_list:
-            npc.ai(player, world.wall_tiles, screen_scroll, fireball_image)
-            npc.update()
-
-        # player animated state
-        player.update()
-
-        # projectile state
-        projectile = pistol.update(player)
-        if projectile:
-            projectile_group.add(projectile)
-            projectile_fx.play()
-
-        # working collision of projectiles with enemies
-        for projectile in projectile_group:
-            damage, damage_pos = projectile.update(screen_scroll, world.wall_tiles, enemy_list + npc_list)
-            if damage:
-                damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
-                damage_text_group.add(damage_text)
-                hit_fx.play()
-
-        damage_text_group.update()
-        fireball_group.update(screen_scroll, player)
-
-        # scrolls screen while keeping items where they belong
-        item_group.update(screen_scroll, player, coin_fx, potion_fx)
+    if start_game ==False:
+        screen.fill(constants.MENU_BACKGROUND)
+        if start_button.draw(screen):
+            start_game= True
+            start_intro = True
+        if exit_button.draw(screen):
+            run = False
+    else:
+        if pause_game == True:
+            screen.fill(constants.MENU_BACKGROUND)
+            if resume_button.draw(screen):
+                pause_game = False
+            if exit_button.draw(screen):
+                run = False
+            
+     
+        else:
+        
+            screen.fill(constants.BACKGROUND)
+        
+            # player can't run around after he's dead
+            if player.alive:
+                # change in x and y
+                dx = 0
+                dy = 0
+        
+                if moving_right:
+                    dx = constants.PLAYER_SPEED
+                if moving_left:
+                    dx = -constants.PLAYER_SPEED
+                if moving_up:
+                    dy = -constants.PLAYER_SPEED
+                if moving_down:
+                    dy = constants.PLAYER_SPEED
+        
+                # moves player and stores screen scroll returned value
+                screen_scroll = player.move(dx, dy, world.wall_tiles)
+        
+                # ----------------------------------------------------
+                # |                 Update Methods                   |
+            # ----------------------------------------------------
+    
+            # level tile set
+                world.update(screen_scroll)
+        
+                # enemy animated state
+                for enemy in enemy_list:
+                    fireball = enemy.ai(player, world.wall_tiles, screen_scroll, fireball_image)
+                    if fireball:
+                        fireball_group.add(fireball)
+                    if enemy.alive:
+                        enemy.update()
+    
+                # non-playable characters (npcs) such as the Merchant
+                for npc in npc_list:
+                    npc.ai(player, world.wall_tiles, screen_scroll, fireball_image)
+                    npc.update()
+    
+                # player animated state
+                player.update()
+        
+                # projectile state
+                projectile = pistol.update(player)
+                if projectile:
+                    projectile_group.add(projectile)
+                    projectile_fx.play()
+        
+                # working collision of projectiles with enemies
+                for projectile in projectile_group:
+                    damage, damage_pos = projectile.update(screen_scroll, world.wall_tiles, enemy_list + npc_list)
+                    if damage:
+                        damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
+                        damage_text_group.add(damage_text)
+                        hit_fx.play()
+        
+                damage_text_group.update()
+                fireball_group.update(screen_scroll, player)
+        
+                # scrolls screen while keeping items where they belong
+                item_group.update(screen_scroll, player, coin_fx, potion_fx)
 
     # ----------------------------------------------------
     # |                  Draw Methods                    |
     # ----------------------------------------------------
 
-    # level tile set
-    world.draw(screen)
+                # level tile set
+                world.draw(screen)
+            
+                # enemy
+                for enemy in enemy_list:
+                    enemy.draw(screen)
+                for npc in npc_list:
+                    npc.draw(screen)
+            
+                # main character, weapon, and items
+                player.draw(screen)
+                pistol.draw(screen)
+                item_group.draw(screen)
+            
+                # projectiles
+                for projectile in projectile_group:
+                    projectile.draw(screen)
+                for fireball in fireball_group:
+                    fireball.draw(screen)
+                damage_text_group.draw(screen)
+        
+                # top part of screen with hp, text, coin sprite
+                game_info()
+                score_coin.draw(screen)
+    
+        # ----------------------------------------------------
+        # |                Event Handler                     |
+        # ----------------------------------------------------
+        # checks to see if level is complete
+        if level_complete:
+            start_intro = True
+            level += 1
+            level_complete = False
+            # ** can add a probability of being taken to the shop
+    
+        # displays game intro
+        if start_intro:
+            if intro_fade.fade():
+                start_intro = False
+                intro_fade.fade_counter = 0
 
-    # enemy
-    for enemy in enemy_list:
-        enemy.draw(screen)
-    for npc in npc_list:
-        npc.draw(screen)
+        # show death!
+        if not player.alive:
+            if death_fade.fade():
+                if restart_button.draw(screen):
+                    death_fade.fade_counter = 0
+                    start_intro = True
+    
+                # *** the bunch of level code needs to be copied down here
+                # delete temp_hp = player.health and player.health = temp_hp
+    
+        for event in pygame.event.get():
+    
+            # finishes loop when you close the game window
+            if event.type == pygame.QUIT:
+                run = False
 
-    # main character, weapon, and items
-    player.draw(screen)
-    pistol.draw(screen)
-    item_group.draw(screen)
+            if event.type == pygame.KEYDOWN:
+                # moves right
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                    moving_right = True
+                # moves left
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                    moving_left = True
+                # moves up
+                if event.key == pygame.K_w or event.key == pygame.K_UP:
+                    moving_up = True
+                # moves down
+                if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                    moving_down = True
+                if event.key  == pygame.K_ESCAPE:
+                    pause_game = True
+                    
+            
 
-    # projectiles
-    for projectile in projectile_group:
-        projectile.draw(screen)
-    for fireball in fireball_group:
-        fireball.draw(screen)
-    damage_text_group.draw(screen)
-
-    # top part of screen with hp, text, coin sprite
-    game_info()
-    score_coin.draw(screen)
-
-    # ----------------------------------------------------
-    # |                Event Handler                     |
-    # ----------------------------------------------------
-    # checks to see if level is complete
-    if level_complete:
-        start_intro = True
-        level += 1
-        level_complete = False
-        # ** can add a probability of being taken to the shop
-
-    # displays game intro
-    if start_intro:
-        if intro_fade.fade():
-            start_intro = False
-            intro_fade.fade_counter = 0
-
-    # show death!
-    if not player.alive:
-        if death_fade.fade():
-            if restart_button.draw(screen):
-                death_fade.fade_counter = 0
-                start_intro = True
-
-            # *** the bunch of level code needs to be copied down here
-            # delete temp_hp = player.health and player.health = temp_hp
-
-    for event in pygame.event.get():
-
-        # finishes loop when you close the game window
-        if event.type == pygame.QUIT:
-            run = False
-
-        if event.type == pygame.KEYDOWN:
-            # moves right
-            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                moving_right = True
-            # moves left
-            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                moving_left = True
-            # moves up
-            if event.key == pygame.K_w or event.key == pygame.K_UP:
-                moving_up = True
-            # moves down
-            if event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                moving_down = True
-
-        # stops player movement if key is let go
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                moving_right = False
-            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                moving_left = False
-            if event.key == pygame.K_w or event.key == pygame.K_UP:
-                moving_up = False
-            if event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                moving_down = False
+            # stops player movement if key is let go
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                    moving_right = False
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                    moving_left = False
+                if event.key == pygame.K_w or event.key == pygame.K_UP:
+                    moving_up = False
+                if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                    moving_down = False
 
     pygame.display.update()
 
