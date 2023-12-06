@@ -6,7 +6,7 @@ from character import Character
 from weapon import Weapon
 from item import Item
 from world import World
-
+from button import Button
 from wave import WaveFunctionCollapse
 
 wave = WaveFunctionCollapse()
@@ -84,6 +84,9 @@ def scale_image(image, scale):
 # |                   Loads Items                    |
 # ----------------------------------------------------
 
+#load button images
+restart_image = scale_image(pygame.image.load("assets/images/buttons/button_restart.png").convert_alpha(),
+                          constants.BUTTON_SCALE)
 # hearts
 empty_heart = scale_image(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(),
                           constants.ITEM_SCALE)
@@ -294,6 +297,8 @@ death_fade = ScreenFade(2, constants.PINK, 4)
 # ----------------------------------------------------
 # |                    Game Loop                     |
 # ----------------------------------------------------
+#create buttons
+restart_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 50, restart_image)
 
 # keeps window open till user closes it
 run = True
@@ -412,8 +417,9 @@ while run:
     # show death!
     if not player.alive:
         if death_fade.fade():
-            death_fade.fade_counter = 0
-            start_intro = True
+            if restart_button.draw(screen):
+                death_fade.fade_counter = 0
+                start_intro = True
 
             # *** the bunch of level code needs to be copied down here
             # delete temp_hp = player.health and player.health = temp_hp
