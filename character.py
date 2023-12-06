@@ -103,6 +103,12 @@ class Character():
         return screen_scroll
 
     def ai(self, player, wall_tiles, screen_scroll, fireball_image):
+
+
+        # npcs get mad if they take damage
+        if self.static and self.health != 50:
+            self.static = False
+
         clipped_line = ()
         stun_cooldown = 100
         ai_dx = 0
@@ -150,7 +156,7 @@ class Character():
                 self.hit = False
                 self.last_hit = pygame.time.get_ticks()
                 self.stunned = True
-                self. move_state = 0
+                self.move_state = 0
               #  self.update_action(0)
             # idle animation not implemented yet
 
