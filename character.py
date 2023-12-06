@@ -156,7 +156,7 @@ class Character():
                 self.hit = False
                 self.last_hit = pygame.time.get_ticks()
                 self.stunned = True
-                self. move_state = 0
+                self.move_state = 0
               #  self.update_action(0)
             # idle animation not implemented yet
 

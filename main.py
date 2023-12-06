@@ -10,7 +10,7 @@ from world import World
 from wave import WaveFunctionCollapse
 
 wave = WaveFunctionCollapse()
-random_level = wave.collapse(20, 10)
+# random_level = wave.collapse(15, 15)
 
 # *** ADDITIONAL TO DO LIST ***
 # ( ) Fix enemy hitbox
@@ -40,6 +40,10 @@ moving_down = False
 # defines which level to load from csv
 level = 1
 screen_scroll = [0, 0]
+
+# game intro animation and whether player completed the level
+start_intro = True
+level_complete = False
 
 # ----------------------------------------------------
 # |                 Sounds Effects                   |
@@ -164,18 +168,48 @@ def game_info():
         else:
             screen.blit(empty_heart, (10 + i * 50, 0))
 
-    # draws the level number
+    # draws the level number -- the shop is numbered 99
     if level != 99:
         draw_text("LEVEL: " + str(level), font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
     else:
         draw_text("SHOP", font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
 
-    # draw wallet ***change how money is displayed
-    draw_text(f"Gold: {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 150, 15)
-    draw_text(f"X {player.money}", font, constants.RED, constants.SCREEN_WIDTH - 75, 15)
+    # draws player wallet
+    draw_text(f"x{player.money}", font, constants.WHITE, constants.SCREEN_WIDTH - 75, 15)
 
 
-# tileset creation for level
+# class used for screen fading
+class ScreenFade():
+    def __init__(self, direction, color, speed):
+        self.direction = direction
+        self.color = color
+        self.speed = speed
+        self.fade_counter = 0
+
+    def fade(self):
+        fade_complete = False
+        self.fade_counter += self.speed
+        if self.direction == 1: # fades up to open the game
+            pygame.draw.rect(screen, self.color, (0 - self.fade_counter, 0,
+                                                  constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT))
+            pygame.draw.rect(screen, self.color, (constants.SCREEN_WIDTH // 2 + self.fade_counter, 0,
+                                                  constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+            pygame.draw.rect(screen, self.color, (0, 0 - self.fade_counter,
+                                                  constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT // 2))
+            pygame.draw.rect(screen, self.color, (0, constants.SCREEN_HEIGHT//2 + self.fade_counter,
+                                                  constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
+        elif self.direction == 2:  # fades down like it's closing the game
+            pygame.draw.rect(screen, self.color, (0, 0, constants.SCREEN_WIDTH, 0 + self.fade_counter))
+
+        if self.fade_counter >= constants.SCREEN_WIDTH:
+            fade_complete = True
+        return fade_complete
+
+# ----------------------------------------------------
+# |                    World Gen                     |
+# ----------------------------------------------------
+
+# tile set creation for level
 world_data = []
 
 # dummy data to populate the list so it is not empty
@@ -190,31 +224,24 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
         for y, tile in enumerate(row):
             world_data[x][y] = int(tile)
 
-
+# def is_wall(tile_name):
+#     return "wall" in tile_name
+#
 # for x, row in enumerate(random_level):
 #     for y, potential in enumerate(row):
 #         tile_type = potential.state.name
-#         if tile_type == "wall":
+#         if is_wall(tile_type):
 #             world_data[x][y] = 7
 #         elif tile_type == "floor":
 #             world_data[x][y] = 0
 #         else:
+#             print(tile_type)
 #             world_data[x][y] = -1
-#
 # world_data[5][5] = 11
 
 world = World()
 world.process_data(world_data, tile_list, all_items, mob_animations)
 
-
-# this function can be deleted later on, it just shows the grid outlines
-# make sure to also delete where it is being called down below
-def draw_grid():
-    for x in range(30):
-        pygame.draw.line(screen, constants.WHITE, (x * constants.TILE_SIZE, 0),
-                         (x * constants.TILE_SIZE, constants.SCREEN_HEIGHT))
-        pygame.draw.line(screen, constants.WHITE, (0, x * constants.TILE_SIZE),
-                         (constants.SCREEN_WIDTH, x * constants.TILE_SIZE))
 
 
 # damage class
@@ -254,102 +281,143 @@ projectile_group = pygame.sprite.Group()
 item_group = pygame.sprite.Group()
 fireball_group = pygame.sprite.Group()
 
-score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_frames, True)
+score_coin = Item(constants.SCREEN_WIDTH - 90, 23, 0, coin_frames, True)
 item_group.add(score_coin)
 
 # loads all items from the world class
 for item in world.all_items:
     item_group.add(item)
 
+intro_fade = ScreenFade(1, constants.BLACK, 4)
+death_fade = ScreenFade(2, constants.PINK, 4)
+
+# ----------------------------------------------------
+# |                    Game Loop                     |
+# ----------------------------------------------------
+
 # keeps window open till user closes it
-run = True  # GAME LOOP
+run = True
 while run:
 
     # sets frame rate and screen background color
     clock.tick(constants.FPS)
     screen.fill(constants.BACKGROUND)
 
-    # can be deleted later
-    draw_grid()
+    # player can't run around after he's dead
+    if player.alive:
+        # change in x and y
+        dx = 0
+        dy = 0
 
-    # change in x and y
-    dx = 0
-    dy = 0
+        if moving_right:
+            dx = constants.PLAYER_SPEED
+        if moving_left:
+            dx = -constants.PLAYER_SPEED
+        if moving_up:
+            dy = -constants.PLAYER_SPEED
+        if moving_down:
+            dy = constants.PLAYER_SPEED
 
-    if moving_right:
-        dx = constants.PLAYER_SPEED
-    if moving_left:
-        dx = -constants.PLAYER_SPEED
-    if moving_up:
-        dy = -constants.PLAYER_SPEED
-    if moving_down:
-        dy = constants.PLAYER_SPEED
+        # moves player and stores screen scroll returned value
+        screen_scroll = player.move(dx, dy, world.wall_tiles)
 
-    # moves player and stores screen scroll returned value
-    screen_scroll = player.move(dx, dy, world.wall_tiles)
+        # ----------------------------------------------------
+        # |                 Update Methods                   |
+        # ----------------------------------------------------
 
-    # ** UPDATE METHODS **
+        # level tile set
+        world.update(screen_scroll)
 
-    # updates the level tileset
-    world.update(screen_scroll)
+        # enemy animated state
+        for enemy in enemy_list:
+            fireball = enemy.ai(player, world.wall_tiles, screen_scroll, fireball_image)
+            if fireball:
+                fireball_group.add(fireball)
+            if enemy.alive:
+                enemy.update()
 
-    # updates enemy animated state
-    for enemy in enemy_list:
-        fireball = enemy.ai(player, world.wall_tiles, screen_scroll, fireball_image)
-        if fireball:
-            fireball_group.add(fireball)
-        if enemy.alive:
-            enemy.update()
+        # non-playable characters (npcs) such as the Merchant
+        for npc in npc_list:
+            npc.ai(player, world.wall_tiles, screen_scroll, fireball_image)
+            npc.update()
 
-    # updates the npcs
-    for npc in npc_list:
-        npc.ai(player, world.wall_tiles, screen_scroll, fireball_image)
-        npc.update()
+        # player animated state
+        player.update()
 
-    # updates player animated state
-    player.update()
-    # updates projectile state
-    projectile = pistol.update(player)
-    if projectile:
-        projectile_group.add(projectile)
-        projectile_fx.play()
-    # working collision of projectiles with enemies
-    for projectile in projectile_group:
-        damage, damage_pos = projectile.update(screen_scroll, world.wall_tiles, enemy_list + npc_list)
-        if damage:
-            damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
-            damage_text_group.add(damage_text)
-            hit_fx.play()
-    damage_text_group.update()
-    fireball_group.update(screen_scroll, player)
-    # scrolls screen while keeping items where they belong
-    item_group.update(screen_scroll, player, coin_fx, potion_fx)
+        # projectile state
+        projectile = pistol.update(player)
+        if projectile:
+            projectile_group.add(projectile)
+            projectile_fx.play()
 
-    # ** DRAW METHODS **
+        # working collision of projectiles with enemies
+        for projectile in projectile_group:
+            damage, damage_pos = projectile.update(screen_scroll, world.wall_tiles, enemy_list + npc_list)
+            if damage:
+                damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
+                damage_text_group.add(damage_text)
+                hit_fx.play()
 
-    # creates the level tileset
+        damage_text_group.update()
+        fireball_group.update(screen_scroll, player)
+
+        # scrolls screen while keeping items where they belong
+        item_group.update(screen_scroll, player, coin_fx, potion_fx)
+
+    # ----------------------------------------------------
+    # |                  Draw Methods                    |
+    # ----------------------------------------------------
+
+    # level tile set
     world.draw(screen)
 
-    # displays the enemy
+    # enemy
     for enemy in enemy_list:
         enemy.draw(screen)
     for npc in npc_list:
         npc.draw(screen)
-    # displays the player (Jason!), weapon, and items
+
+    # main character, weapon, and items
     player.draw(screen)
     pistol.draw(screen)
     item_group.draw(screen)
-    # displays projectiles (weapon bullets, etc)
+
+    # projectiles
     for projectile in projectile_group:
         projectile.draw(screen)
     for fireball in fireball_group:
         fireball.draw(screen)
     damage_text_group.draw(screen)
-    # draws top part of screen with hp, text, coin sprite
+
+    # top part of screen with hp, text, coin sprite
     game_info()
     score_coin.draw(screen)
 
-    # event handler
+    # ----------------------------------------------------
+    # |                Event Handler                     |
+    # ----------------------------------------------------
+    # checks to see if level is complete
+    if level_complete:
+        start_intro = True
+        level += 1
+        level_complete = False
+        # ** can add a probability of being taken to the shop
+
+    # displays game intro
+    if start_intro:
+        if intro_fade.fade():
+            start_intro = False
+            intro_fade.fade_counter = 0
+
+    # show death!
+    if not player.alive:
+        if death_fade.fade():
+            death_fade.fade_counter = 0
+            start_intro = True
+
+            # *** the bunch of level code needs to be copied down here
+            # delete temp_hp = player.health and player.health = temp_hp
+
     for event in pygame.event.get():
 
         # finishes loop when you close the game window

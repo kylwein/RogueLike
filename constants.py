@@ -25,6 +25,8 @@ SCROLL_THRESH = 250
 # colors :)
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+PINK = (222, 111, 161)
 BACKGROUND = (40, 40, 40)
 
 PLAYER_SPEED = 5
