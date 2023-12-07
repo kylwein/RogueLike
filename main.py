@@ -329,13 +329,17 @@ resume_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT/
 
 
 
+
+
 # keeps window open till user closes it
 run = True
 while run:
     # sets frame rate and screen background color
     clock.tick(constants.FPS)
 
+
     if start_game == False:
+
         screen.fill(constants.MENU_BACKGROUND)
         if start_button.draw(screen):
             start_game= True
@@ -354,6 +358,8 @@ while run:
         else:
         
             screen.fill(constants.BACKGROUND)
+
+
 
             # player can't run around after he's dead
             if player.alive:
@@ -420,6 +426,7 @@ while run:
     # |                  Draw Methods                    |
     # ----------------------------------------------------
 
+
             # level tile set
             world.draw(screen)
             
@@ -444,11 +451,13 @@ while run:
                 # top part of screen with hp, text, coin sprite
             game_info()
             score_coin.draw(screen)
+
     
         # ----------------------------------------------------
         # |                Event Handler                     |
         # ----------------------------------------------------
         # checks to see if level is complete
+
             if level_complete:
                 start_intro = True
                 level += 1
@@ -521,6 +530,7 @@ while run:
                 moving_up = False
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 moving_down = False
+
 
     pygame.display.update()
 
