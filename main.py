@@ -38,7 +38,7 @@ moving_up = False
 moving_down = False
 
 # defines which level to load from csv
-level = 2
+level = 99
 screen_scroll = [0, 0]
 
 # game intro animation and whether player completed the level
@@ -46,6 +46,7 @@ start_intro = False
 start_game = False
 pause_game = False
 level_complete = False
+
 
 # ----------------------------------------------------
 # |                 Sounds Effects                   |
@@ -164,6 +165,19 @@ def draw_text(text, font, color, x, y):
     image = font.render(text, True, color)
     screen.blit(image, (x, y))
 
+def reset_level():
+  damage_text_group.empty()
+  projectile_group.empty()
+  item_group.empty()
+  fireball_group.empty()
+
+  #create empty tile list
+  data = []
+  for row in range(constants.ROWS):
+    r = [-1] * constants.COLS
+    data.append(r)
+
+  return data
 
 # displays game info
 def game_info():
@@ -313,14 +327,19 @@ exit_button = Button(constants.SCREEN_WIDTH //2 -110, constants.SCREEN_HEIGHT//2
 restart_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 50, restart_image)
 resume_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 150, resume_image)
 
+
+
+
+
 # keeps window open till user closes it
 run = True
 while run:
-
     # sets frame rate and screen background color
     clock.tick(constants.FPS)
 
-    if start_game ==False:
+
+    if start_game == False:
+
         screen.fill(constants.MENU_BACKGROUND)
         if start_button.draw(screen):
             start_game= True
@@ -339,7 +358,9 @@ while run:
         else:
         
             screen.fill(constants.BACKGROUND)
-        
+
+
+
             # player can't run around after he's dead
             if player.alive:
                 # change in x and y
@@ -405,91 +426,111 @@ while run:
     # |                  Draw Methods                    |
     # ----------------------------------------------------
 
-                # level tile set
-                world.draw(screen)
+
+            # level tile set
+            world.draw(screen)
             
-                # enemy
-                for enemy in enemy_list:
-                    enemy.draw(screen)
-                for npc in npc_list:
-                    npc.draw(screen)
+            # enemy
+            for enemy in enemy_list:
+                enemy.draw(screen)
+            for npc in npc_list:
+                npc.draw(screen)
             
                 # main character, weapon, and items
-                player.draw(screen)
-                pistol.draw(screen)
-                item_group.draw(screen)
+            player.draw(screen)
+            pistol.draw(screen)
+            item_group.draw(screen)
             
                 # projectiles
-                for projectile in projectile_group:
-                    projectile.draw(screen)
-                for fireball in fireball_group:
-                    fireball.draw(screen)
-                damage_text_group.draw(screen)
+            for projectile in projectile_group:
+                projectile.draw(screen)
+            for fireball in fireball_group:
+                fireball.draw(screen)
+            damage_text_group.draw(screen)
         
                 # top part of screen with hp, text, coin sprite
-                game_info()
-                score_coin.draw(screen)
+            game_info()
+            score_coin.draw(screen)
+
     
         # ----------------------------------------------------
         # |                Event Handler                     |
         # ----------------------------------------------------
         # checks to see if level is complete
-        if level_complete:
-            start_intro = True
-            level += 1
-            level_complete = False
-            # ** can add a probability of being taken to the shop
-    
-        # displays game intro
-        if start_intro:
-            if intro_fade.fade():
-                start_intro = False
-                intro_fade.fade_counter = 0
 
-        # show death!
-        if not player.alive:
-            if death_fade.fade():
-                if restart_button.draw(screen):
-                    death_fade.fade_counter = 0
-                    start_intro = True
+            if level_complete:
+                start_intro = True
+                level += 1
+                level_complete = False
+                # ** can add a probability of being taken to the shop
+
+            # displays game intro
+            if start_intro:
+                if intro_fade.fade():
+                    start_intro = False
+                    intro_fade.fade_counter = 0
+
+            # show death!
+            if not player.alive:
+                if death_fade.fade():
+                    if restart_button.draw(screen):
+                        death_fade.fade_counter = 0
+                        start_intro = True
+                        world_data = reset_level()
+                        with open(f"levels/level{level}_data.csv", newline="") as csvfile:
+                            reader = csv.reader(csvfile, delimiter=",")
+                            for x, row in enumerate(reader):
+                                for y, tile in enumerate(row):
+                                    world_data[x][y] = int(tile)
+                        world = World()
+                        world.process_data(world_data, tile_list, all_items, mob_animations)
+                        temp_score = player.money
+                        player = world.player
+                        player.money = temp_score
+                        enemy_list = world.all_enemies
+                        score_coin = Item(constants.SCREEN_WIDTH - 115, 23, 0, coin_frames, True)
+                        item_group.add(score_coin)
+                        # add the items from the level data
+                        for item in world.all_items:
+                            item_group.add(item)
     
-                # *** the bunch of level code needs to be copied down here
                 # delete temp_hp = player.health and player.health = temp_hp
     
-        for event in pygame.event.get():
-    
-            # finishes loop when you close the game window
-            if event.type == pygame.QUIT:
-                run = False
+    for event in pygame.event.get():
 
-            if event.type == pygame.KEYDOWN:
-                # moves right
-                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                    moving_right = True
-                # moves left
-                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                    moving_left = True
-                # moves up
-                if event.key == pygame.K_w or event.key == pygame.K_UP:
-                    moving_up = True
-                # moves down
-                if event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                    moving_down = True
-                if event.key  == pygame.K_ESCAPE:
-                    pause_game = True
-                    
-            
+        # finishes loop when you close the game window
+        if event.type == pygame.QUIT:
+            run = False
 
-            # stops player movement if key is let go
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                    moving_right = False
-                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                    moving_left = False
-                if event.key == pygame.K_w or event.key == pygame.K_UP:
-                    moving_up = False
-                if event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                    moving_down = False
+        if event.type == pygame.KEYDOWN:
+            # moves right
+            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                moving_right = True
+            # moves left
+            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                moving_left = True
+            # moves up
+            if event.key == pygame.K_w or event.key == pygame.K_UP:
+                moving_up = True
+            # moves down
+            if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                moving_down = True
+            if event.key  == pygame.K_ESCAPE:
+                pause_game = True
+
+
+
+        # stops player movement if key is let go
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                moving_right = False
+            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                moving_left = False
+            if event.key == pygame.K_w or event.key == pygame.K_UP:
+                moving_up = False
+            if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                moving_down = False
+
 
     pygame.display.update()
 
