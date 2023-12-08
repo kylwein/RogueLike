@@ -18,6 +18,10 @@ from wave import WaveFunctionCollapse
 # (X) Fix character field of view orientation (following mouse cursor)
 # ( ) Fix Merchant Spawn position (spawning a tile too low)
 
+# defines which level to load from csv
+level = 0
+screen_scroll = [0, 0]
+
 # initializes pygame and music mixer
 mixer.init()
 pygame.init()
@@ -34,10 +38,6 @@ moving_left = False
 moving_right = False
 moving_up = False
 moving_down = False
-
-# defines which level to load from csv
-level = 0
-screen_scroll = [0, 0]
 
 # game intro animation and whether player completed the level
 start_intro = False

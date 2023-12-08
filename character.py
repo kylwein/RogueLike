@@ -4,7 +4,7 @@ import constants
 import math
 
 class Character():
-    def __init__(self, x, y, health, mob_animations, mob_type, boss_enemy, size, static=False):
+    def __init__(self, x, y, health, max_health, mob_animations, mob_type, boss_enemy, size, static=False):
         self.mob_type = mob_type
         self.boss_enemy = boss_enemy
 
@@ -14,6 +14,7 @@ class Character():
         self.move_state = 0 # idle = 0, run = 1, ...
         self.update_time = pygame.time.get_ticks() # time since frame updated
         self.health = health
+        self.max_health = max_health
         self.alive = True
         self.hit = False
         self.last_hit = pygame.time.get_ticks()
@@ -28,6 +29,8 @@ class Character():
 
         # used so the NPCs stay still
         self.static = static
+
+
 
 
     def move(self, dx, dy, wall_tiles):
@@ -192,6 +195,22 @@ class Character():
         if self.frame_index >= len(self.animation_list[self.move_state]):
             self.frame_index = 0
 
+    def draw_health_bar(self, surface, pos, size, border_c, back_c, health_c, progress):
+        pygame.draw.rect(surface, back_c, (*pos, *size))
+        pygame.draw.rect(surface, border_c, (*pos, *size), 1)
+        inner_pos = (pos[0] + 1, pos[1] + 1)
+        inner_size = ((size[0] - 2) * progress, size[1] - 2)
+        rect = (round(inner_pos[0]), round(inner_pos[1]), round(inner_size[0]), round(inner_size[1]))
+        pygame.draw.rect(surface, health_c, rect)
+
+    def draw_health(self, surface):
+        if self.health < self.max_health:
+            health_rect = pygame.Rect(0, 0, 30, 8)
+            health_rect.midbottom = self.rect.centerx, self.rect.top
+            health_rect.midbottom = self.rect.centerx, self.rect.top
+            self.draw_health_bar(surface, health_rect.topleft, health_rect.size,
+                            (1, 0, 0), (255, 0, 0), (0, 255, 0), self.health / self.max_health)
+
     def draw(self, surface):
         flipped_image = pygame.transform.flip(self.image, self.flip, False)
 
@@ -199,6 +218,7 @@ class Character():
             surface.blit(flipped_image, (self.rect.x, self.rect.y - constants.PLAYER_SCALE * constants.OFFSET))
         else:
             if self.alive:
+                self.draw_health(surface)
                 surface.blit(flipped_image, self.rect)
 
     def get_rect(self):
@@ -209,3 +229,5 @@ class Character():
 
     def set_pos(self, pos):
         self.rect.x, self.rect.y = pos
+
+
