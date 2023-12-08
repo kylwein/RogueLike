@@ -44,12 +44,12 @@ class World():
                 # 10 represents potions
                 elif tile == 10:
                     # item_list[1] is a list of still images as of now
-                    potion = Item(image_x, image_y, 1, item_list[1], False, 1)
+                    potion = Item(image_x, image_y, 1, item_list[1], False, 3) # costs 3 coins
                     self.all_items.append(potion)
                     tile_data[0] = tile_list[0]
                 # 11 represents the player
                 elif tile == 11:
-                    player = Character(image_x, image_y, 100, mob_animations, 0, False, 1)
+                    player = Character(image_x, image_y, 90, mob_animations, 0, False, 1)
                     self.player = player
                     tile_data[0] = tile_list[0]
                 # 12 - 16 are all enemies; 17 is the boss *** tweak HP values and size

@@ -1,4 +1,5 @@
 import pygame
+import random
 from pygame import mixer
 import csv
 import constants
@@ -8,9 +9,6 @@ from item import Item
 from world import World
 from button import Button
 from wave import WaveFunctionCollapse
-
-wave = WaveFunctionCollapse()
-# random_level = wave.collapse(15, 15)
 
 # *** ADDITIONAL TO DO LIST ***
 # ( ) Fix enemy hitbox
@@ -38,7 +36,7 @@ moving_up = False
 moving_down = False
 
 # defines which level to load from csv
-level = 1
+level = 0
 screen_scroll = [0, 0]
 
 # game intro animation and whether player completed the level
@@ -46,7 +44,6 @@ start_intro = False
 start_game = False
 pause_game = False
 level_complete = False
-
 
 # ----------------------------------------------------
 # |                 Sounds Effects                   |
@@ -76,16 +73,11 @@ potion_fx.set_volume(0.5)
 # define font!!
 font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
 
-
 # helper function for image scaling
 def scale_image(image, scale):
     w = image.get_width()
     h = image.get_height()
     return pygame.transform.scale(image, (w * scale, h * scale))
-
-# ----------------------------------------------------
-# |                   Loads Items                    |
-# ----------------------------------------------------
 
 # scales background images (game menu, game over screen, etc)
 def background_scaler(image):
@@ -102,6 +94,10 @@ def background_scaler(image):
 
     # scales the image
     return scale_image(image, scale_factor)
+
+# ----------------------------------------------------
+# |                   Loads Items                    |
+# ----------------------------------------------------
 
 # game intro image
 intro = pygame.image.load("assets/images/backgrounds/game_intro.png").convert_alpha()
@@ -164,7 +160,6 @@ for x in range(constants.DIFF_TILES + 1):  # addresses out of bounds error
     tile_image = pygame.transform.scale(tile_image, (constants.TILE_SIZE, constants.TILE_SIZE))
     tile_list.append(tile_image)
 
-
 for mob in mob_types:
     # clears animation list
     temp_mob_list = []
@@ -181,7 +176,6 @@ for mob in mob_types:
         temp_mob_list.append(temp_action_list)
 
     mob_animations.append(temp_mob_list)
-
 
 # draws text onto screen
 def draw_text(text, font, color, x, y):
@@ -268,6 +262,34 @@ class ScreenFade():
 # |                    World Gen                     |
 # ----------------------------------------------------
 
+level_width, level_height = 15, 15
+def add_perimeter_walls(world_data, wall_tile_index):
+    rows = level_width
+    columns = level_height
+
+    # Top and bottom rows
+    for col in range(columns):
+        world_data[0][col] = wall_tile_index
+        world_data[rows - 1][col] = wall_tile_index
+
+    # Left and right columns
+    for row in range(1, rows - 1):
+        world_data[row][0] = wall_tile_index
+        world_data[row][columns - 1] = wall_tile_index
+
+def place_exit(world_data, exit_tile_index):
+    rows = level_width
+    columns = level_height
+
+    while True:
+        x = random.randint(1, rows - 2)
+        y = random.randint(1, columns - 2)
+
+        # Ensure the chosen spot is not a wall
+        if world_data[x][y] != 7:  # Assuming 7 is the wall tile index
+            world_data[x][y] = exit_tile_index
+            break
+
 # tile set creation for level
 world_data = []
 
@@ -283,6 +305,9 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
         for y, tile in enumerate(row):
             world_data[x][y] = int(tile)
 
+# wave = WaveFunctionCollapse()
+# random_level = wave.collapse(level_width, level_height)
+#
 # def is_wall(tile_name):
 #     return "wall" in tile_name
 #
@@ -296,7 +321,14 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
 #         else:
 #             print(tile_type)
 #             world_data[x][y] = -1
+
+
+
+
+# add_perimeter_walls(world_data, 7)
+# place_exit(world_data, 8)
 # world_data[5][5] = 11
+
 
 world = World()
 world.process_data(world_data, tile_list, all_items, mob_animations)
@@ -437,7 +469,8 @@ while run:
         
                 # working collision of projectiles with enemies
                 for projectile in projectile_group:
-                    damage, damage_pos = projectile.update(screen_scroll, world.wall_tiles, enemy_list + npc_list)
+                    characters_list = enemy_list + npc_list
+                    damage, damage_pos = projectile.update(screen_scroll, world.wall_tiles, characters_list)
                     if damage:
                         damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
                         damage_text_group.add(damage_text)
@@ -478,12 +511,11 @@ while run:
             game_info()
             score_coin.draw(screen)
 
-    
             # ----------------------------------------------------
             # |                Event Handler                     |
             # ----------------------------------------------------
-            # checks to see if level is complete
 
+            # checks to see if level is complete
             if not level_complete:
                 varrect = player.get_rect()
                 if varrect.colliderect(world.ladder_tile[1]):
@@ -494,7 +526,7 @@ while run:
                 level += 1
 
                 # -----------------------------------------------
-                # |              Recreates the World            |
+                # |             Recreates the World             |
                 # -----------------------------------------------
 
                 # tile set creation for level
@@ -598,9 +630,8 @@ while run:
             # moves down
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 moving_down = True
-            if event.key  == pygame.K_ESCAPE:
+            if event.key == pygame.K_ESCAPE:
                 pause_game = True
-
 
         # stops player movement if key is let go
         if event.type == pygame.KEYUP:
@@ -612,7 +643,6 @@ while run:
                 moving_up = False
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 moving_down = False
-
 
     pygame.display.update()
 

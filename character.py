@@ -122,7 +122,9 @@ class Character():
                 clipped_line = wall[1].clipline(line_of_sight)
 
         # checks distance to player
-        dist = math.sqrt(((self.rect.centerx - player.rect.centerx)** 2) + ((self.rect.centery - player.rect.centery)**2))
+        dist = math.sqrt(((self.rect.centerx - player.rect.centerx) ** 2) + (
+                (self.rect.centery - player.rect.centery) ** 2))
+
         if not clipped_line and dist > constants.RANGE:
             if self.rect.centerx > player.rect.centerx: # right hand side
                 ai_dx = -constants.ENEMY_SPEED
