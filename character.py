@@ -64,7 +64,6 @@ class Character():
                 if dx < 0:
                     self.rect.left = wall[1].right
 
-
         self.rect.y += dy
         # check if player is touching a wall
         for wall in wall_tiles:
@@ -144,6 +143,7 @@ class Character():
                     player.health -= 10
                     player.hit = True
                     player.last_hit = pygame.time.get_ticks()
+
                 # boss enemies shoot fireballs
                 fireball_cooldown = 700
                 if self.boss_enemy:
@@ -200,3 +200,12 @@ class Character():
         else:
             if self.alive:
                 surface.blit(flipped_image, self.rect)
+
+    def get_rect(self):
+        return self.rect
+
+    def get_pos(self):
+        return (self.rect.x, self.rect.y)
+
+    def set_pos(self, pos):
+        self.rect.x, self.rect.y = pos

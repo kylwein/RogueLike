@@ -38,7 +38,7 @@ moving_up = False
 moving_down = False
 
 # defines which level to load from csv
-level = 99
+level = 2
 screen_scroll = [0, 0]
 
 # game intro animation and whether player completed the level
@@ -127,7 +127,7 @@ fireball_image = scale_image(pygame.image.load("assets/images/weapons/fireball.p
                              constants.FIREBALL_SCALE)
 # player projectiles
 projectile_img = pygame.image.load("assets/images/weapons/blue_lightsaber.png").convert_alpha()
-projectile_image = scale_image(projectile_img, constants.WEAPON_SCALE)
+projectile_image = scale_image(projectile_img, constants.PROJECTILE_SCALE)
 
 # mob entities
 mob_animations = []
@@ -327,20 +327,17 @@ exit_button = Button(constants.SCREEN_WIDTH //2 -110, constants.SCREEN_HEIGHT//2
 restart_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 50, restart_image)
 resume_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 150, resume_image)
 
-
-
-
-
 # keeps window open till user closes it
 run = True
 while run:
     # sets frame rate and screen background color
     clock.tick(constants.FPS)
 
-
     if start_game == False:
 
         screen.fill(constants.MENU_BACKGROUND)
+        draw_text("JASON JOURNEY", font, constants.BLACK, 270, 100)
+
         if start_button.draw(screen):
             start_game= True
             start_intro = True
@@ -353,13 +350,10 @@ while run:
                 pause_game = False
             if exit_button.draw(screen):
                 run = False
-            
-     
+
         else:
-        
+
             screen.fill(constants.BACKGROUND)
-
-
 
             # player can't run around after he's dead
             if player.alive:
@@ -381,7 +375,7 @@ while run:
         
                 # ----------------------------------------------------
                 # |                 Update Methods                   |
-            # ----------------------------------------------------
+                # ----------------------------------------------------
     
             # level tile set
                 world.update(screen_scroll)
@@ -415,7 +409,7 @@ while run:
                         damage_text = DamageText(damage_pos.centerx, damage_pos.y, str(damage), constants.RED)
                         damage_text_group.add(damage_text)
                         hit_fx.play()
-        
+
                 damage_text_group.update()
                 fireball_group.update(screen_scroll, player)
         
@@ -458,9 +452,59 @@ while run:
         # ----------------------------------------------------
         # checks to see if level is complete
 
+            if not level_complete:
+                varrect = player.get_rect()
+                if varrect.colliderect(world.ladder_tile[1]):
+                    level_complete = True
+
             if level_complete:
                 start_intro = True
                 level += 1
+
+                #------------------------------------------------
+                #|              Recreates the World             |
+                #-----------------------------------------------|
+
+                # tile set creation for level
+                world_data = []
+
+                # dummy data to populate the list so it is not empty
+                for row in range(constants.ROWS):
+                    r = [-1] * constants.COLS
+                    world_data.append(r)
+
+                # overwrites dummy data with actual level
+                with open(f"levels/level{level}_data.csv", newline="") as csvfile:
+                    reader = csv.reader(csvfile, delimiter=",")
+                    for x, row in enumerate(reader):
+                        for y, tile in enumerate(row):
+                            world_data[x][y] = int(tile)
+                world = World()
+                world.process_data(world_data, tile_list, all_items, mob_animations)
+
+                # resets player position to the position from the world class
+                newpos = world.player.get_pos()
+                player.set_pos(newpos)
+
+                # gets the enemy list from the world class
+                enemy_list = world.all_enemies
+
+                # gets the npc list from the world class
+                npc_list = world.all_npcs
+
+                # creates sprite group for projectiles
+                damage_text_group = pygame.sprite.Group()
+                projectile_group = pygame.sprite.Group()
+                item_group = pygame.sprite.Group()
+                fireball_group = pygame.sprite.Group()
+
+                score_coin = Item(constants.SCREEN_WIDTH - 90, 23, 0, coin_frames, True)
+                item_group.add(score_coin)
+
+                # loads all items from the world class
+                for item in world.all_items:
+                    item_group.add(item)
+
                 level_complete = False
                 # ** can add a probability of being taken to the shop
 
@@ -476,6 +520,7 @@ while run:
                     if restart_button.draw(screen):
                         death_fade.fade_counter = 0
                         start_intro = True
+                        level = 1
                         world_data = reset_level()
                         with open(f"levels/level{level}_data.csv", newline="") as csvfile:
                             reader = csv.reader(csvfile, delimiter=",")
@@ -517,7 +562,6 @@ while run:
                 moving_down = True
             if event.key  == pygame.K_ESCAPE:
                 pause_game = True
-
 
 
         # stops player movement if key is let go
