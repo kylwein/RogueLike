@@ -37,19 +37,19 @@ class World():
                     self.ladder_tile = tile_data
                 # 9 represents coins
                 elif tile == 9:
-                    coin = Item(image_x, image_y, 0, item_list[0])
+                    coin = Item(image_x, image_y, 0, item_list[0], False)
                     self.all_items.append(coin)
                     # overrides coin tile with floor tile
                     tile_data[0] = tile_list[0]
                 # 10 represents potions
                 elif tile == 10:
                     # item_list[1] is a list of still images as of now
-                    potion = Item(image_x, image_y, 1, item_list[1])
+                    potion = Item(image_x, image_y, 1, item_list[1], False, 1)
                     self.all_items.append(potion)
                     tile_data[0] = tile_list[0]
                 # 11 represents the player
                 elif tile == 11:
-                    player = Character(image_x, image_y, 1, mob_animations, 0, False, 1)
+                    player = Character(image_x, image_y, 100, mob_animations, 0, False, 1)
                     self.player = player
                     tile_data[0] = tile_list[0]
                 # 12 - 16 are all enemies; 17 is the boss *** tweak HP values and size

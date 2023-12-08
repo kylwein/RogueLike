@@ -1,7 +1,7 @@
 import pygame.sprite
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, x, y, item_type, animation_types, static = False):
+    def __init__(self, x, y, item_type, animation_types, static, price=0):
         pygame.sprite.Sprite.__init__(self)
         self.animations = animation_types
         self.item = item_type
@@ -11,6 +11,7 @@ class Item(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.static = static
+        self.price = price
 
     def update(self, screen_scroll, player, coin_fx, potion_fx):
         # repositions item if the screen moves
@@ -19,7 +20,7 @@ class Item(pygame.sprite.Sprite):
             self.rect.y += screen_scroll[1]
 
         # if item has been collected
-        if self.rect.colliderect(player.rect):
+        if self.rect.colliderect(player.rect) and self.price <= player.money:
             if self.item == 0:
                 player.money += 1
                 coin_fx.play()
@@ -28,6 +29,8 @@ class Item(pygame.sprite.Sprite):
                 potion_fx.play()
                 if player.health > 100:
                     player.health = 100
+            # subtracts item price from player wallet
+            player.money -= self.price
             self.kill()
 
         # animates the item

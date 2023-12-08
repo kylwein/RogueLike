@@ -38,7 +38,7 @@ moving_up = False
 moving_down = False
 
 # defines which level to load from csv
-level = 2
+level = 1
 screen_scroll = [0, 0]
 
 # game intro animation and whether player completed the level
