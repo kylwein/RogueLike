@@ -10,7 +10,8 @@ class WaveFunctionCollapse():
         def repeat_state(state, count):
             return [state] * count
 
-        floor_repeat_count = 10
+        # working as supposed
+        floor_repeat_count = 5
 
         self.floor = State(
             "floor",
@@ -29,10 +30,10 @@ class WaveFunctionCollapse():
             "top_wall",
             Rule(
                 lambda x, y: {
-                    (x, y - 1): ["floor"],  # Above
-                    (x - 1, y): ["top_left_wall", "top_wall"] + floor_repeat_count * ["floor"],  # Left
-                    (x + 1, y): ["top_right_wall", "top_wall"] + floor_repeat_count * ["floor"],  # Right
-                    (x, y + 1): ["floor"]  # Below
+                    (x, y - 1): ["floor", "air"],  # Above
+                    (x - 1, y): ["top_left_wall", "top_wall"],  # Left
+                    (x + 1, y): ["top_right_wall", "top_wall"],  # Right
+                    (x, y + 1): ["floor", "air"]  # Below
                 }
             )
         )
@@ -40,10 +41,10 @@ class WaveFunctionCollapse():
             "left_wall",
             Rule(
                 lambda x, y: {
-                    (x, y - 1): ["top_left_wall", "left_wall"] + floor_repeat_count * ["floor"],  # Above
-                    (x - 1, y): ["floor"],  # Left
-                    (x + 1, y): ["floor"],  # Right
-                    (x, y + 1): ["bottom_left_wall", "left_wall"] + floor_repeat_count * ["floor"]  # Below
+                    (x, y - 1): ["top_left_wall", "left_wall", "left_wall" "left_wall"],  # Above
+                    (x - 1, y): ["floor", "air"],  # Left
+                    (x + 1, y): ["floor", "air"],  # Right
+                    (x, y + 1): ["bottom_left_wall", "left_wall", "left_wall", "left_wall"] # Below
                 }
             )
         )
@@ -51,10 +52,10 @@ class WaveFunctionCollapse():
             "right_wall",
             Rule(
                 lambda x, y: {
-                    (x, y - 1): ["top_right_wall", "right_wall"] + floor_repeat_count * ["floor"],  # Above
-                    (x - 1, y): ["floor"],  # Left
-                    (x + 1, y): ["floor"],  # Right
-                    (x, y + 1): ["bottom_right_wall", "right_wall"] + floor_repeat_count * ["floor"] # Below
+                    (x, y - 1): ["top_right_wall", "right_wall", "right_wall", "right_wall"],  # Above
+                    (x - 1, y): ["floor", "air"],  # Left
+                    (x + 1, y): ["floor", "air"],  # Right
+                    (x, y + 1): ["bottom_right_wall", "right_wall", "right_wall", "right_wall"] # Below
                 }
             )
         )
@@ -63,8 +64,8 @@ class WaveFunctionCollapse():
             Rule(
                 lambda x, y: {
                     (x, y - 1): ["floor"],  # Above
-                    (x - 1, y): ["bottom_left_wall", "bottom_wall"] + floor_repeat_count * ["floor"],  # Left
-                    (x + 1, y): ["bottom_right_wall", "bottom_wall"] + floor_repeat_count * ["floor"],  # Right
+                    (x - 1, y): ["bottom_left_wall", "bottom_wall", "bottom_wall", "bottom_wall"],  # Left
+                    (x + 1, y): ["bottom_right_wall", "bottom_wall", "bottom_wall", "bottom_wall"],  # Right
                     (x, y + 1): ["floor"]  # Below
                 }
             )
@@ -76,8 +77,8 @@ class WaveFunctionCollapse():
             "top_left_wall",
             Rule(
                 lambda x, y: {
-                    (x, y - 1): ["air", "floor"],  # Above
-                    (x - 1, y): ["air", "floor"],  # Left
+                    (x, y - 1): ["floor"],  # Above
+                    (x - 1, y): ["floor"],  # Left
                     (x + 1, y): ["top_wall"],  # Right
                     (x, y + 1): ["left_wall"]  # Below
                 }
@@ -87,9 +88,9 @@ class WaveFunctionCollapse():
             "top_right_wall",
             Rule(
                 lambda x, y: {
-                    (x, y - 1): ["air", "floor"],  # Above
+                    (x, y - 1): ["floor"],  # Above
                     (x - 1, y): ["top_wall"],  # Left
-                    (x + 1, y): ["air", "floor"],  # Right
+                    (x + 1, y): ["floor"],  # Right
                     (x, y + 1): ["right_wall"]  # Below
                 }
             )
@@ -99,9 +100,9 @@ class WaveFunctionCollapse():
             Rule(
                 lambda x, y: {
                     (x, y - 1): ["left_wall"],  # Above
-                    (x - 1, y): ["air", "floor"],  # Left
+                    (x - 1, y): ["floor"],  # Left
                     (x + 1, y): ["bottom_wall"],  # Right
-                    (x, y + 1): ["air", "floor"]  # Below
+                    (x, y + 1): ["floor"]  # Below
                 }
             )
         )
@@ -111,16 +112,23 @@ class WaveFunctionCollapse():
                 lambda x, y: {
                     (x, y - 1): ["right_wall"],  # Above
                     (x - 1, y): ["bottom_wall"],  # Left
-                    (x + 1, y): ["air", "floor"],  # Right
-                    (x, y + 1): ["air", "floor"]  # Below
+                    (x + 1, y): ["floor"],  # Right
+                    (x, y + 1): ["floor"]  # Below
                 }
             )
         )
 
-
-
-
-
+        self.air = State(
+            "air",
+            Rule(
+                lambda x, y: {
+                    (x, y - 1): ["air", "bottom_wall"],  # Above
+                    (x - 1, y): ["air", "right_wall"],  # Left
+                    (x + 1, y): ["air", "left_wall"],  # Right
+                    (x, y + 1): ["air", "top_wall"]  # Below
+                }
+            )
+        )
 
 
 
@@ -131,9 +139,11 @@ class WaveFunctionCollapse():
         # Create the wave with your states
         level_wave = Wave(level_dimensions, [self.floor, self.top_left, self.top_right, self.bottom_left, self.bottom_right,
                                              self.top_wall, self.right_wall, self.bottom_wall, self.left_wall,
+                                             self.top_wall, self.right_wall, self.bottom_wall, self.left_wall,
                                              self.floor, self.floor, self.floor, self.floor, self.floor, self.floor,
                                              self.floor, self.floor, self.floor, self.floor, self.floor, self.floor,
-                                             ])
+                                             self.floor, self.floor, self.floor, self.floor, self.floor, self.floor,
+                                            ])
 
         # Collapse the wave to generate the level
         generated_level = level_wave.collapse()
