@@ -49,7 +49,7 @@ class World():
                     tile_data[0] = tile_list[0]
                 # 11 represents the player
                 elif tile == 11:
-                    player = Character(image_x, image_y, 100, mob_animations, 0, False, 1)
+                    player = Character(image_x, image_y, 1, mob_animations, 0, False, 1)
                     self.player = player
                     tile_data[0] = tile_list[0]
                 # 12 - 16 are all enemies; 17 is the boss *** tweak HP values and size

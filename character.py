@@ -4,7 +4,7 @@ import constants
 import math
 
 class Character():
-    def __init__(self, x, y, health, mob_animations, mob_type, boss_enemy, size, static = False):
+    def __init__(self, x, y, health, mob_animations, mob_type, boss_enemy, size, static=False):
         self.mob_type = mob_type
         self.boss_enemy = boss_enemy
 
@@ -58,7 +58,7 @@ class Character():
         for wall in wall_tiles:
             # verify wall and player collision
             if wall[1].colliderect(self.rect):
-                # check which side collision occured
+                # check which side collision occurred
                 if dx > 0:
                     self.rect.right = wall[1].left
                 if dx < 0:
@@ -69,7 +69,7 @@ class Character():
         for wall in wall_tiles:
             # verify wall and player collision
             if wall[1].colliderect(self.rect):
-                # check which side collision occured
+                # check which side collision occurred
                 if dy > 0:
                     self.rect.bottom = wall[1].top
                 elif dy < 0:
@@ -103,8 +103,7 @@ class Character():
 
     def ai(self, player, wall_tiles, screen_scroll, fireball_image):
 
-
-        # npcs get mad if they take damage
+        # npcs get aggressive if they take damage
         if self.static and self.health != 50:
             self.static = False
 
@@ -152,12 +151,13 @@ class Character():
                             fireball = weapon.Fireball(fireball_image, self.rect.centerx, self.rect.centery, player.rect.centerx, player.rect.centery)
                             self.last_attack = pygame.time.get_ticks()
 
-            if self.hit == True:
+            # when boss gets hit
+            if self.hit:
                 self.hit = False
                 self.last_hit = pygame.time.get_ticks()
                 self.stunned = True
                 self.move_state = 0
-              #  self.update_action(0)
+              # self.update_action(0)
             # idle animation not implemented yet
 
             if (pygame.time.get_ticks() - self.last_hit > stun_cooldown):
@@ -165,18 +165,16 @@ class Character():
 
         return fireball
 
-
-
     def update(self):
-
-        if self.health <= 0: #see if your dead
+        # checks if player is dead
+        if self.health <= 0:
             self.health = 0
             self.alive = False
 
-    # timer to reset hit
+        # timer to reset hit
         hit_cooldown = 500
         if self.mob_type == 0:
-            if self.hit == True:
+            if self.hit:
                 if pygame.time.get_ticks() - self.last_hit > hit_cooldown:
                     self.hit = False
 
@@ -205,7 +203,7 @@ class Character():
         return self.rect
 
     def get_pos(self):
-        return (self.rect.x, self.rect.y)
+        return self.rect.x, self.rect.y
 
     def set_pos(self, pos):
         self.rect.x, self.rect.y = pos

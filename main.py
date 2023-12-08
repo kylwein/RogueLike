@@ -87,7 +87,31 @@ def scale_image(image, scale):
 # |                   Loads Items                    |
 # ----------------------------------------------------
 
-#load button images
+# scales background images (game menu, game over screen, etc)
+def background_scaler(image):
+    # gets the original dimensions of the image
+    original_width = image.get_width()
+    original_height = image.get_height()
+
+    # finds appropriate scale factor
+    scale_factor_width = constants.SCREEN_WIDTH / original_width
+    scale_factor_height = constants.SCREEN_HEIGHT / original_height
+
+    # uses greater factor so image covers the entire screen
+    scale_factor = min(scale_factor_width, scale_factor_height)
+
+    # scales the image
+    return scale_image(image, scale_factor)
+
+# game intro image
+intro = pygame.image.load("assets/images/backgrounds/game_intro.png").convert_alpha()
+intro_image = background_scaler(intro)
+
+# game over image
+gameover = pygame.image.load("assets/images/backgrounds/game_over.png").convert_alpha()
+gameover_image = background_scaler(gameover)
+
+# button images
 start_image = scale_image(pygame.image.load("assets/images/buttons/button_start.png").convert_alpha(),
                           constants.BUTTON_SCALE)
 exit_image = scale_image(pygame.image.load("assets/images/buttons/button_exit.png").convert_alpha(),
@@ -96,7 +120,6 @@ restart_image = scale_image(pygame.image.load("assets/images/buttons/button_rest
                           constants.BUTTON_SCALE)
 resume_image = scale_image(pygame.image.load("assets/images/buttons/button_resume.png").convert_alpha(),
                           constants.BUTTON_SCALE)
-
 
 # hearts
 empty_heart = scale_image(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(),
@@ -207,15 +230,23 @@ def game_info():
 
 # class used for screen fading
 class ScreenFade():
-    def __init__(self, direction, color, speed):
+    def __init__(self, direction, color, speed, fade_image=None):
         self.direction = direction
         self.color = color
         self.speed = speed
         self.fade_counter = 0
+        self.image = fade_image
 
     def fade(self):
         fade_complete = False
         self.fade_counter += self.speed
+
+        if self.image:
+            # if an image is provided, draw it at the center of the screen
+            image_x = (constants.SCREEN_WIDTH - self.image.get_width()) // 2
+            image_y = (constants.SCREEN_HEIGHT - self.image.get_height()) // 2
+            screen.blit(self.image, (image_x, image_y))
+
         if self.direction == 1: # fades up to open the game
             pygame.draw.rect(screen, self.color, (0 - self.fade_counter, 0,
                                                   constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT))
@@ -230,6 +261,7 @@ class ScreenFade():
 
         if self.fade_counter >= constants.SCREEN_WIDTH:
             fade_complete = True
+
         return fade_complete
 
 # ----------------------------------------------------
@@ -315,17 +347,18 @@ item_group.add(score_coin)
 for item in world.all_items:
     item_group.add(item)
 
-intro_fade = ScreenFade(1, constants.BLACK, 4)
-death_fade = ScreenFade(2, constants.PINK, 4)
+intro_fade = ScreenFade(1, constants.BLACK, 8)
+death_fade = ScreenFade(2, constants.FADE_BLACK, 12)
 
 # ----------------------------------------------------
 # |                    Game Loop                     |
 # ----------------------------------------------------
-#create buttons
-start_button = Button(constants.SCREEN_WIDTH //2 -145, constants.SCREEN_HEIGHT//2 - 150, start_image)
-exit_button = Button(constants.SCREEN_WIDTH //2 -110, constants.SCREEN_HEIGHT//2 + 50, exit_image)
-restart_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 50, restart_image)
-resume_button = Button(constants.SCREEN_WIDTH //2 -175, constants.SCREEN_HEIGHT//2 - 150, resume_image)
+
+# creates buttons
+start_button = Button(constants.SCREEN_WIDTH // 2 - 45, constants.SCREEN_HEIGHT // 2 + 50, start_image)
+exit_button = Button(25, 475, exit_image)
+restart_button = Button(constants.SCREEN_WIDTH // 2 - restart_image.get_width() // 2, 450, restart_image)
+resume_button = Button(constants.SCREEN_WIDTH // 2 - 175, constants.SCREEN_HEIGHT // 2 - 150, resume_image)
 
 # keeps window open till user closes it
 run = True
@@ -333,18 +366,19 @@ while run:
     # sets frame rate and screen background color
     clock.tick(constants.FPS)
 
-    if start_game == False:
+    if not start_game:
 
-        screen.fill(constants.MENU_BACKGROUND)
-        draw_text("JASON JOURNEY", font, constants.BLACK, 270, 100)
+        screen.blit(intro_image, (0, 0))
+        #screen.fill(constants.MENU_BACKGROUND)
+        #draw_text("JASON JOURNEY", font, constants.BLACK, 270, 100)
 
         if start_button.draw(screen):
-            start_game= True
+            start_game = True
             start_intro = True
         if exit_button.draw(screen):
             run = False
     else:
-        if pause_game == True:
+        if pause_game:
             screen.fill(constants.MENU_BACKGROUND)
             if resume_button.draw(screen):
                 pause_game = False
@@ -352,7 +386,6 @@ while run:
                 run = False
 
         else:
-
             screen.fill(constants.BACKGROUND)
 
             # player can't run around after he's dead
@@ -377,7 +410,7 @@ while run:
                 # |                 Update Methods                   |
                 # ----------------------------------------------------
     
-            # level tile set
+                # level tile set
                 world.update(screen_scroll)
         
                 # enemy animated state
@@ -416,10 +449,9 @@ while run:
                 # scrolls screen while keeping items where they belong
                 item_group.update(screen_scroll, player, coin_fx, potion_fx)
 
-    # ----------------------------------------------------
-    # |                  Draw Methods                    |
-    # ----------------------------------------------------
-
+            # ----------------------------------------------------
+            # |                  Draw Methods                    |
+            # ----------------------------------------------------
 
             # level tile set
             world.draw(screen)
@@ -430,27 +462,27 @@ while run:
             for npc in npc_list:
                 npc.draw(screen)
             
-                # main character, weapon, and items
+            # main character, weapon, and items
             player.draw(screen)
             pistol.draw(screen)
             item_group.draw(screen)
             
-                # projectiles
+            # projectiles
             for projectile in projectile_group:
                 projectile.draw(screen)
             for fireball in fireball_group:
                 fireball.draw(screen)
             damage_text_group.draw(screen)
         
-                # top part of screen with hp, text, coin sprite
+            # top part of screen with hp, text, coin sprite
             game_info()
             score_coin.draw(screen)
 
     
-        # ----------------------------------------------------
-        # |                Event Handler                     |
-        # ----------------------------------------------------
-        # checks to see if level is complete
+            # ----------------------------------------------------
+            # |                Event Handler                     |
+            # ----------------------------------------------------
+            # checks to see if level is complete
 
             if not level_complete:
                 varrect = player.get_rect()
@@ -461,9 +493,9 @@ while run:
                 start_intro = True
                 level += 1
 
-                #------------------------------------------------
-                #|              Recreates the World             |
-                #-----------------------------------------------|
+                # -----------------------------------------------
+                # |              Recreates the World            |
+                # -----------------------------------------------
 
                 # tile set creation for level
                 world_data = []
@@ -517,6 +549,12 @@ while run:
             # show death!
             if not player.alive:
                 if death_fade.fade():
+
+                    # displays game over screen
+                    image_x = (constants.SCREEN_WIDTH - gameover_image.get_width()) // 2
+                    image_y = (constants.SCREEN_HEIGHT - gameover_image.get_height()) // 2
+                    screen.blit(gameover_image, (image_x, image_y))
+
                     if restart_button.draw(screen):
                         death_fade.fade_counter = 0
                         start_intro = True
