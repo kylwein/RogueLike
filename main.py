@@ -95,7 +95,7 @@ def background_scaler(image, mini=True):
     if mini:
         scale_factor = min(scale_factor_width, scale_factor_height)
     else:
-        scale_factor = max(scale_factor_width, scale_factor_height)
+        scale_factor = 1
 
 
     # scales the image
@@ -106,40 +106,37 @@ def background_scaler(image, mini=True):
 # ----------------------------------------------------
 
 # cutscene images
+uf_scenery = background_scaler(pygame.image.load("assets/images/backgrounds/uf_scenery.png").convert_alpha())
+at_desk = background_scaler(pygame.image.load("assets/images/backgrounds/at_desk.png").convert_alpha())
+fallen_book = background_scaler(pygame.image.load("assets/images/backgrounds/fallen_book.png").convert_alpha())
+loading_gun = background_scaler(pygame.image.load("assets/images/backgrounds/loading_gun.png").convert_alpha())
 face_tower = background_scaler(pygame.image.load("assets/images/backgrounds/facing_tower.png").convert_alpha())
+
 reaching_power = background_scaler(pygame.image.load("assets/images/backgrounds/reaching_power.png").convert_alpha())
 the_end = background_scaler(pygame.image.load("assets/images/backgrounds/the_end.png").convert_alpha())
 
 
 # create a cutscene manager and add scenes for beginning of story
 cutscene_manager = CutsceneManager()
-cutscene_manager.add_scene(DialogueScene('It had been a tough year...', 1, cutscene_font, face_tower))
-cutscene_manager.add_scene(DialogueScene('Jason had been trying to solve Fermat\'s Last Theorem with no luck', 1, cutscene_font))
-#cutscene_manager.add_scene(DialogueScene('All of a sudden, a book fell off his shelf', 2, cutscene_font))
-#cutscene_manager.add_scene(DialogueScene('Its pages said that the last floor of Century Tower held the secret to all math formulas', 2, cutscene_font))
+cutscene_manager.add_scene(DialogueScene('It had been a rough year at the University of Florida...', 3, cutscene_font, uf_scenery))
+# cutscene_manager.add_scene(DialogueScene('Jason had been trying to solve Fermat\'s Last Theorem with no luck', 3, cutscene_font, at_desk))
+# cutscene_manager.add_scene(DialogueScene('All of a sudden, a book fell off his shelf', 3, cutscene_font, fallen_book))
+# cutscene_manager.add_scene(DialogueScene('Its pages told the tale of the mysteries that lied on the last floor of Century Tower', 4, cutscene_font, fallen_book))
+# cutscene_manager.add_scene(DialogueScene('Loading up his Lightsaber pistol, Jason was determined to get to the bottom of this', 4, cutscene_font, loading_gun))
+# cutscene_manager.add_scene(DialogueScene('And so our hero\'s journey begins...', 3, cutscene_font, face_tower))
 cutscene_manager.start()
 
 # create a cutscene manager for end scenes
 end_images = []
-for i in range(1, 12):
+for i in range(1, 17):
     temp_image = background_scaler(pygame.image.load(f"assets/images/backgrounds/{i}.jpeg").convert_alpha(), False)
     end_images.append(temp_image)
 
 cutscene_end = CutsceneManager()
-cutscene_end.add_scene(DialogueScene('He had done it. He had found the ultimate math equation.', 5, cutscene_font, reaching_power))
-cutscene_end.add_scene(DialogueScene('He had done it. He had found the ultimate math equation.', 5, cutscene_font, reaching_power))
+cutscene_end.add_scene(DialogueScene('He had done wit. He had found the ultimate math equation.', 5, cutscene_font, reaching_power))
+#cutscene_end.add_scene(DialogueScene('He had done it. He had found the ultimate math equation.', 5, cutscene_font, reaching_power))
 
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[0]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[1]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[2]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[3]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[4]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[5]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[6]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[7]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[8]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[9]))
-cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[10]))
+cutscene_end.add_scene(TrippyScene(end_images, 10))
 
 cutscene_end.add_scene(DialogueScene('Jason had achieved godhood. He solved all humanity\'s problems and bought a'
                                      'house where he lived happily thereafter', 4, cutscene_font, the_end))
