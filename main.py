@@ -9,6 +9,7 @@ from item import Item
 from world import World
 from button import Button
 from wave import WaveFunctionCollapse
+from cutscene import *
 
 # *** ADDITIONAL TO DO LIST ***
 # ( ) Fix enemy hitbox
@@ -19,7 +20,7 @@ from wave import WaveFunctionCollapse
 # ( ) Fix Merchant Spawn position (spawning a tile too low)
 
 # defines which level to load from csv
-level = 0
+level = 5
 screen_scroll = [0, 0]
 
 # initializes pygame and music mixer
@@ -72,6 +73,7 @@ potion_fx.set_volume(0.5)
 
 # define font!!
 font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
+cutscene_font = pygame.font.Font("assets/fonts/MinimalPixel.ttf", 20)
 
 # helper function for image scaling
 def scale_image(image, scale):
@@ -80,7 +82,7 @@ def scale_image(image, scale):
     return pygame.transform.scale(image, (w * scale, h * scale))
 
 # scales background images (game menu, game over screen, etc)
-def background_scaler(image):
+def background_scaler(image, mini=True):
     # gets the original dimensions of the image
     original_width = image.get_width()
     original_height = image.get_height()
@@ -90,10 +92,59 @@ def background_scaler(image):
     scale_factor_height = constants.SCREEN_HEIGHT / original_height
 
     # uses greater factor so image covers the entire screen
-    scale_factor = min(scale_factor_width, scale_factor_height)
+    if mini:
+        scale_factor = min(scale_factor_width, scale_factor_height)
+    else:
+        scale_factor = max(scale_factor_width, scale_factor_height)
+
 
     # scales the image
     return scale_image(image, scale_factor)
+
+# ----------------------------------------------------
+# |                Cutscene Methods                  |
+# ----------------------------------------------------
+
+# cutscene images
+face_tower = background_scaler(pygame.image.load("assets/images/backgrounds/facing_tower.png").convert_alpha())
+reaching_power = background_scaler(pygame.image.load("assets/images/backgrounds/reaching_power.png").convert_alpha())
+the_end = background_scaler(pygame.image.load("assets/images/backgrounds/the_end.png").convert_alpha())
+
+
+# create a cutscene manager and add scenes for beginning of story
+cutscene_manager = CutsceneManager()
+cutscene_manager.add_scene(DialogueScene('It had been a tough year...', 1, cutscene_font, face_tower))
+cutscene_manager.add_scene(DialogueScene('Jason had been trying to solve Fermat\'s Last Theorem with no luck', 1, cutscene_font))
+#cutscene_manager.add_scene(DialogueScene('All of a sudden, a book fell off his shelf', 2, cutscene_font))
+#cutscene_manager.add_scene(DialogueScene('Its pages said that the last floor of Century Tower held the secret to all math formulas', 2, cutscene_font))
+cutscene_manager.start()
+
+# create a cutscene manager for end scenes
+end_images = []
+for i in range(1, 12):
+    temp_image = background_scaler(pygame.image.load(f"assets/images/backgrounds/{i}.jpeg").convert_alpha(), False)
+    end_images.append(temp_image)
+
+cutscene_end = CutsceneManager()
+cutscene_end.add_scene(DialogueScene('He had done it. He had found the ultimate math equation.', 5, cutscene_font, reaching_power))
+cutscene_end.add_scene(DialogueScene('He had done it. He had found the ultimate math equation.', 5, cutscene_font, reaching_power))
+
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[0]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[1]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[2]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[3]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[4]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[5]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[6]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[7]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[8]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[9]))
+cutscene_end.add_scene(DialogueScene('Jason felt the fabric of reality distorting', 0.5, cutscene_font, end_images[10]))
+
+cutscene_end.add_scene(DialogueScene('Jason had achieved godhood. He solved all humanity\'s problems and bought a'
+                                     'house where he lived happily thereafter', 4, cutscene_font, the_end))
+
+cutscene_end.start()
 
 # ----------------------------------------------------
 # |                   Loads Items                    |
@@ -394,6 +445,9 @@ resume_button = Button(constants.SCREEN_WIDTH // 2 - 175, constants.SCREEN_HEIGH
 
 # keeps window open till user closes it
 run = True
+is_cutscene_playing = False
+game_won = False
+
 while run:
     # sets frame rate and screen background color
     clock.tick(constants.FPS)
@@ -407,8 +461,27 @@ while run:
         if start_button.draw(screen):
             start_game = True
             start_intro = True
+            is_cutscene_playing = True
+
         if exit_button.draw(screen):
             run = False
+
+    elif is_cutscene_playing:
+        # updates and draws only the cutscene
+        # screen.fill(constants.BLACK)
+        cutscene_manager.update()
+        cutscene_manager.draw(screen)
+        pygame.display.flip()
+
+        # checks that the cutscene is finished
+        if cutscene_manager.is_finished():
+            is_cutscene_playing = False
+
+    elif game_won:
+        cutscene_end.update()
+        cutscene_end.draw(screen)
+        pygame.display.flip()
+
     else:
         if pause_game:
             screen.fill(constants.MENU_BACKGROUND)
@@ -444,7 +517,7 @@ while run:
     
                 # level tile set
                 world.update(screen_scroll)
-        
+
                 # enemy animated state
                 for enemy in enemy_list:
                     fireball = enemy.ai(player, world.wall_tiles, screen_scroll, fireball_image)
@@ -482,13 +555,13 @@ while run:
                 # scrolls screen while keeping items where they belong
                 item_group.update(screen_scroll, player, coin_fx, potion_fx)
 
-            # ----------------------------------------------------
-            # |                  Draw Methods                    |
-            # ----------------------------------------------------
+            # ---------------------------------------------------
+            # |                  Draw Methods                   |
+            # ---------------------------------------------------
 
             # level tile set
             world.draw(screen)
-            
+
             # enemy
             for enemy in enemy_list:
                 enemy.draw(screen)
@@ -511,9 +584,9 @@ while run:
             game_info()
             score_coin.draw(screen)
 
-            # ----------------------------------------------------
-            # |                Event Handler                     |
-            # ----------------------------------------------------
+            # ---------------------------------------------------
+            # |                Event Handler                    |
+            # ---------------------------------------------------
 
             # checks to see if level is complete
             if not level_complete:
@@ -525,52 +598,57 @@ while run:
                 start_intro = True
                 level += 1
 
+                # ends game and plays ending cutscene
+                if level == 6:
+                    game_won = True
+
                 # -----------------------------------------------
                 # |             Recreates the World             |
                 # -----------------------------------------------
 
-                # tile set creation for level
-                world_data = []
+                else:
+                    # tile set creation for level
+                    world_data = []
 
-                # dummy data to populate the list so it is not empty
-                for row in range(constants.ROWS):
-                    r = [-1] * constants.COLS
-                    world_data.append(r)
+                    # dummy data to populate the list so it is not empty
+                    for row in range(constants.ROWS):
+                        r = [-1] * constants.COLS
+                        world_data.append(r)
 
-                # overwrites dummy data with actual level
-                with open(f"levels/level{level}_data.csv", newline="") as csvfile:
-                    reader = csv.reader(csvfile, delimiter=",")
-                    for x, row in enumerate(reader):
-                        for y, tile in enumerate(row):
-                            world_data[x][y] = int(tile)
-                world = World()
-                world.process_data(world_data, tile_list, all_items, mob_animations)
+                    # overwrites dummy data with actual level
+                    with open(f"levels/level{level}_data.csv", newline="") as csvfile:
+                        reader = csv.reader(csvfile, delimiter=",")
+                        for x, row in enumerate(reader):
+                            for y, tile in enumerate(row):
+                                world_data[x][y] = int(tile)
+                    world = World()
+                    world.process_data(world_data, tile_list, all_items, mob_animations)
 
-                # resets player position to the position from the world class
-                newpos = world.player.get_pos()
-                player.set_pos(newpos)
+                    # resets player position to the position from the world class
+                    newpos = world.player.get_pos()
+                    player.set_pos(newpos)
 
-                # gets the enemy list from the world class
-                enemy_list = world.all_enemies
+                    # gets the enemy list from the world class
+                    enemy_list = world.all_enemies
 
-                # gets the npc list from the world class
-                npc_list = world.all_npcs
+                    # gets the npc list from the world class
+                    npc_list = world.all_npcs
 
-                # creates sprite group for projectiles
-                damage_text_group = pygame.sprite.Group()
-                projectile_group = pygame.sprite.Group()
-                item_group = pygame.sprite.Group()
-                fireball_group = pygame.sprite.Group()
+                    # creates sprite group for projectiles
+                    damage_text_group = pygame.sprite.Group()
+                    projectile_group = pygame.sprite.Group()
+                    item_group = pygame.sprite.Group()
+                    fireball_group = pygame.sprite.Group()
 
-                score_coin = Item(constants.SCREEN_WIDTH - 90, 23, 0, coin_frames, True)
-                item_group.add(score_coin)
+                    score_coin = Item(constants.SCREEN_WIDTH - 90, 23, 0, coin_frames, True)
+                    item_group.add(score_coin)
 
-                # loads all items from the world class
-                for item in world.all_items:
-                    item_group.add(item)
+                    # loads all items from the world class
+                    for item in world.all_items:
+                        item_group.add(item)
 
-                level_complete = False
-                # ** can add a probability of being taken to the shop
+                    level_complete = False
+                    # ** can add a probability of being taken to the shop
 
             # displays game intro
             if start_intro:
