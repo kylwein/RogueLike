@@ -2,9 +2,13 @@ from character import Character
 from item import Item
 import constants
 
-class World():
+
+class World:
     def __init__(self):
+        self.level_length = None
         self.map_tiles = []
+        self.overlay_tiles = []
+
         self.wall_tiles = []
         self.ladder_tile = None
         self.player = None
@@ -16,7 +20,6 @@ class World():
     # "tile_list" has images for the associated numbers in "data"
     def process_data(self, data, tile_list, item_list, mob_animations):
         self.level_length = len(data)
-
 
         # creates y and x counter in function definition
         for y, row in enumerate(data):
@@ -44,7 +47,7 @@ class World():
                 # 10 represents potions
                 elif tile == 10:
                     # item_list[1] is a list of still images as of now
-                    potion = Item(image_x, image_y, 1, item_list[1], False, 3) # costs 3 coins
+                    potion = Item(image_x, image_y, 1, item_list[1], False, 3)  # costs 3 coins
                     self.all_items.append(potion)
                     tile_data[0] = tile_list[0]
                 # 11 represents the player
@@ -77,35 +80,23 @@ class World():
                     enemy = Character(image_x, image_y, 100, 100, mob_animations, 6, True, 2)
                     self.all_enemies.append(enemy)
                     tile_data[0] = tile_list[0]
-                elif tile == 18: # merchant
-                    npc = Character(image_x, image_y, 50, 50, mob_animations, 7, True, 1, True)
-                    self.all_npcs.append(npc)
+                elif tile == 18:  # merchant
+                    npc = Character(image_x, image_y, 50, 50, mob_animations, 7, False, 2, True)
+                    self.all_enemies.append(npc)
                     tile_data[0] = tile_list[0]
 
-
-                elif tile == 19: # space for another npc
-                    tile_data[0] = tile_list[0]
-
-                elif tile == 20: # space for another npc
-                    tile_data[0] = tile_list[0]
-
-                elif tile > 20 and tile < 30:
+                elif tile == 23 or tile == 24 or tile == 25:
                     self.wall_tiles.append(tile_data)
 
-                # elif tile == 21: # top left
-                # elif tile == 22: # top right
-                # elif tile == 23: # bottom left
-                # elif tile == 24: # bottom right
-                # elif tile == 25: # left wall
-                # elif tile == 26: # right wall
-                # elif tile > 26 and tile < 30: # top walls (1, 2, 3)
-                # elif tile == 30: # bottom wall
+                # under development // overlay tiles
+                elif tile == 26:
+                    self.overlay_tiles.append(tile_data)
+                    # tile_data[0] = tile_list[0]
 
                 # adds the single tile to the map tiles list
                 # no negative images so must be positive value
                 if tile >= 0:
                     self.map_tiles.append(tile_data)
-
 
     def update(self, screen_scroll):
         for tile in self.map_tiles:
@@ -114,6 +105,11 @@ class World():
             tile[1].center = (tile[2], tile[3])
 
     def draw(self, surface):
+
         for tile in self.map_tiles:
             # first argument is which tile, second argument is where to be drawn
+            surface.blit(tile[0], tile[1])
+
+        # draws overlay tiles
+        for tile in self.overlay_tiles:
             surface.blit(tile[0], tile[1])

@@ -3,16 +3,17 @@ import weapon
 import constants
 import math
 
-class Character():
+
+class Character:
     def __init__(self, x, y, health, max_health, mob_animations, mob_type, boss_enemy, size, static=False):
         self.mob_type = mob_type
         self.boss_enemy = boss_enemy
 
         self.flip = False
         self.animation_list = mob_animations[mob_type]
-        self.frame_index = 0 # index to change sprite states
-        self.move_state = 0 # idle = 0, run = 1, ...
-        self.update_time = pygame.time.get_ticks() # time since frame updated
+        self.frame_index = 0  # index to change sprite states
+        self.move_state = 0  # idle = 0, run = 1, ...
+        self.update_time = pygame.time.get_ticks()  # time since frame updated
         self.health = health
         self.max_health = max_health
         self.alive = True
@@ -24,14 +25,11 @@ class Character():
 
         # image stuff :)
         self.image = self.animation_list[self.move_state][self.frame_index]
-        self.rect = pygame.Rect(0, 0, constants.TILE_SIZE * size, constants.TILE_SIZE * size) # hitbox
-        self.rect.center = (x, y) # center of hitbox
+        self.rect = pygame.Rect(0, 0, constants.TILE_SIZE * size, constants.TILE_SIZE * size)  # hit box
+        self.rect.center = (x, y)  # center of hit box
 
         # used so the NPCs stay still
         self.static = static
-
-
-
 
     def move(self, dx, dy, wall_tiles):
         screen_scroll = [0, 0]
@@ -105,7 +103,6 @@ class Character():
         return screen_scroll
 
     def ai(self, player, wall_tiles, screen_scroll, fireball_image):
-
         # npcs get aggressive if they take damage
         if self.static and self.health != 50:
             self.static = False
@@ -129,21 +126,20 @@ class Character():
                 (self.rect.centery - player.rect.centery) ** 2))
 
         if not clipped_line and dist > constants.RANGE:
-            if self.rect.centerx > player.rect.centerx: # right hand side
+            if self.rect.centerx > player.rect.centerx:  # right hand side
                 ai_dx = -constants.ENEMY_SPEED
-            if self.rect.centerx < player.rect.centerx: # left hand side
+            if self.rect.centerx < player.rect.centerx:  # left hand side
                 ai_dx = constants.ENEMY_SPEED
-            if self.rect.centery > player.rect.centery: # below
+            if self.rect.centery > player.rect.centery:  # below
                 ai_dy = -constants.ENEMY_SPEED
-            if self.rect.centery < player.rect.centery: # above
+            if self.rect.centery < player.rect.centery:  # above
                 ai_dy = constants.ENEMY_SPEED
 
         if self.alive and not self.static:
-
             if not self.stunned:
                 self.move(ai_dx, ai_dy, wall_tiles)
 
-                if dist < constants.ATTACK_RANGE and player.hit == False:
+                if dist < constants.ATTACK_RANGE and player.hit is False:
                     player.health -= 10
                     player.hit = True
                     player.last_hit = pygame.time.get_ticks()
@@ -162,10 +158,9 @@ class Character():
                 self.last_hit = pygame.time.get_ticks()
                 self.stunned = True
                 self.move_state = 0
-              # self.update_action(0)
-            # idle animation not implemented yet
 
-            if (pygame.time.get_ticks() - self.last_hit > stun_cooldown):
+            # idle animation not implemented yet
+            if pygame.time.get_ticks() - self.last_hit > stun_cooldown:
                 self.stunned = False
 
         return fireball
@@ -229,5 +224,3 @@ class Character():
 
     def set_pos(self, pos):
         self.rect.x, self.rect.y = pos
-
-

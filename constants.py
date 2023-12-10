@@ -12,7 +12,7 @@ FIREBALL_SCALE = 1
 FIREBALL_SPEED = 4
 
 TILE_SIZE = 16 * SCALE
-DIFF_TILES = 18 # eg. tile0.png, ... tile17.png
+DIFF_TILES = 26 # eg. tile0.png, ... tile17.png
 
 # eg. idle animation loop time for character
 ANIMATION_COOLDOWN = 100

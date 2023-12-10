@@ -80,8 +80,12 @@ class DialogueScene(Scene):
         else:
             screen.fill(constants.BLACK)
 
+        rect_height = 50  # Adjust the height as needed
+        pygame.draw.rect(screen, constants.BLACK,
+                         (0, screen.get_height() - rect_height, screen.get_width(), rect_height))
+
         render_text = self.font.render(self.text, True, constants.WHITE)
-        text_rect = render_text.get_rect(center=(constants.SCREEN_WIDTH//2 + 25, 525))
+        text_rect = render_text.get_rect(center=(constants.SCREEN_WIDTH//2 + 25, 545))
         screen.blit(render_text, text_rect)
 
     def is_finished(self):
@@ -90,19 +94,23 @@ class DialogueScene(Scene):
 
 
 class TrippyScene(Scene):
-    def __init__(self, image_list, duration, change_interval=500):  # change_interval in milliseconds
+    def __init__(self, image_list, duration, font, text, change_interval=500):  # change_interval in milliseconds
         self.image_list = image_list
         self.duration = duration
         self.change_interval = change_interval
         self.last_change_time = 0
         self.elapsed_time = 0
         self.current_image = random.choice(self.image_list)
+        self.transformed_image = self.apply_effect(self.current_image)
         self.start_ticks = pygame.time.get_ticks()
+        self.font = font
+        self.text = text
 
     def start(self):
         self.start_ticks = pygame.time.get_ticks()
         self.last_change_time = self.start_ticks
         self.current_image = random.choice(self.image_list)
+        self.transformed_image = self.apply_effect(self.current_image)
 
     def update(self):
         current_ticks = pygame.time.get_ticks()
@@ -111,17 +119,29 @@ class TrippyScene(Scene):
         # Change the image if the interval has passed
         if current_ticks - self.last_change_time > self.change_interval:
             self.current_image = random.choice(self.image_list)
+            self.transformed_image = self.apply_effect(self.current_image)
             self.last_change_time = current_ticks
 
     def draw(self, screen):
         if self.elapsed_time < self.duration:
-            # Apply the trippy effect
-            angle = random.randint(0, 360)
-            scale = random.uniform(0.5, 1.5)
-            rotated_image = pygame.transform.rotozoom(self.current_image, angle, scale)
-            x = random.randint(0, max(0, screen.get_width() - rotated_image.get_width()))
-            y = random.randint(0, max(0, screen.get_height() - rotated_image.get_height()))
-            screen.blit(rotated_image, (x, y))
+            # Draw the transformed image
+            x = random.randint(0, max(0, screen.get_width() - self.transformed_image.get_width()))
+            y = random.randint(0, max(0, screen.get_height() - self.transformed_image.get_height()))
+            screen.blit(self.transformed_image, (x, y))
+
+            rect_height = 50  # Adjust the height as needed
+            pygame.draw.rect(screen, constants.BLACK,
+                             (0, screen.get_height() - rect_height, screen.get_width(), rect_height))
+
+            render_text = self.font.render(self.text, True, constants.WHITE)
+            text_rect = render_text.get_rect(center=(constants.SCREEN_WIDTH // 2 + 25, 545))
+            screen.blit(render_text, text_rect)
 
     def is_finished(self):
         return self.elapsed_time >= self.duration
+
+    def apply_effect(self, image):
+        # Apply the trippy effect
+        angle = random.randint(0, 360)
+        scale = random.uniform(0.5, 1.5)
+        return pygame.transform.rotozoom(image, angle, scale)

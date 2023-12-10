@@ -1,26 +1,21 @@
-import pygame
-import random
 from pygame import mixer
 import csv
-import constants
-from character import Character
 from weapon import Weapon
 from item import Item
 from world import World
 from button import Button
-from wave import WaveFunctionCollapse
 from cutscene import *
 
 # *** ADDITIONAL TO DO LIST ***
-# ( ) Fix enemy hitbox
+# ( ) Fix enemy hit box
 # ( ) Make potion have 4 total frames, so it is animated
-# ( ) Tweak Enemy Health and Hitbox arguments
+# ( ) Tweak Enemy Health and hit box arguments
 # ( ) Find other Music/Sounds effects
 # (X) Fix character field of view orientation (following mouse cursor)
 # ( ) Fix Merchant Spawn position (spawning a tile too low)
 
 # defines which level to load from csv
-level = 5
+level = 0
 screen_scroll = [0, 0]
 
 # initializes pygame and music mixer
@@ -75,17 +70,19 @@ potion_fx.set_volume(0.5)
 font = pygame.font.Font("assets/fonts/AtariClassic.ttf", 20)
 cutscene_font = pygame.font.Font("assets/fonts/MinimalPixel.ttf", 20)
 
+
 # helper function for image scaling
-def scale_image(image, scale):
-    w = image.get_width()
-    h = image.get_height()
-    return pygame.transform.scale(image, (w * scale, h * scale))
+def scale_image(local_image, scale):
+    w = local_image.get_width()
+    h = local_image.get_height()
+    return pygame.transform.scale(local_image, (w * scale, h * scale))
+
 
 # scales background images (game menu, game over screen, etc)
-def background_scaler(image, mini=True):
+def background_scaler(local_image, mini=True):
     # gets the original dimensions of the image
-    original_width = image.get_width()
-    original_height = image.get_height()
+    original_width = local_image.get_width()
+    original_height = local_image.get_height()
 
     # finds appropriate scale factor
     scale_factor_width = constants.SCREEN_WIDTH / original_width
@@ -97,9 +94,9 @@ def background_scaler(image, mini=True):
     else:
         scale_factor = 1
 
-
     # scales the image
-    return scale_image(image, scale_factor)
+    return scale_image(local_image, scale_factor)
+
 
 # ----------------------------------------------------
 # |                Cutscene Methods                  |
@@ -111,19 +108,18 @@ at_desk = background_scaler(pygame.image.load("assets/images/backgrounds/at_desk
 fallen_book = background_scaler(pygame.image.load("assets/images/backgrounds/fallen_book.png").convert_alpha())
 loading_gun = background_scaler(pygame.image.load("assets/images/backgrounds/loading_gun.png").convert_alpha())
 face_tower = background_scaler(pygame.image.load("assets/images/backgrounds/facing_tower.png").convert_alpha())
-
 reaching_power = background_scaler(pygame.image.load("assets/images/backgrounds/reaching_power.png").convert_alpha())
 the_end = background_scaler(pygame.image.load("assets/images/backgrounds/the_end.png").convert_alpha())
 
-
 # create a cutscene manager and add scenes for beginning of story
 cutscene_manager = CutsceneManager()
-cutscene_manager.add_scene(DialogueScene('It had been a rough year at the University of Florida...', 3, cutscene_font, uf_scenery))
-# cutscene_manager.add_scene(DialogueScene('Jason had been trying to solve Fermat\'s Last Theorem with no luck', 3, cutscene_font, at_desk))
-# cutscene_manager.add_scene(DialogueScene('All of a sudden, a book fell off his shelf', 3, cutscene_font, fallen_book))
-# cutscene_manager.add_scene(DialogueScene('Its pages told the tale of the mysteries that lied on the last floor of Century Tower', 4, cutscene_font, fallen_book))
-# cutscene_manager.add_scene(DialogueScene('Loading up his Lightsaber pistol, Jason was determined to get to the bottom of this', 4, cutscene_font, loading_gun))
-# cutscene_manager.add_scene(DialogueScene('And so our hero\'s journey begins...', 3, cutscene_font, face_tower))
+cutscene_manager.add_scene(DialogueScene('It had been a rough year at the University of Florida...', 1, cutscene_font, uf_scenery))
+cutscene_manager.add_scene(DialogueScene('It had been a rough year at the University of Florida...', 5, cutscene_font, uf_scenery))
+cutscene_manager.add_scene(DialogueScene('Jason had been trying to solve Fermat\'s Last Theorem with no luck', 5, cutscene_font, at_desk))
+cutscene_manager.add_scene(DialogueScene('All of a sudden, a book fell off his shelf', 3, cutscene_font, fallen_book))
+cutscene_manager.add_scene(DialogueScene('Its pages told the tale of the mysteries that lied on the last floor of Century Tower', 4, cutscene_font, fallen_book))
+cutscene_manager.add_scene(DialogueScene('Loading up his Lightsaber pistol, Jason was determined to get to the bottom of this', 5, cutscene_font, loading_gun))
+cutscene_manager.add_scene(DialogueScene('And so our hero\'s journey begins...', 5, cutscene_font, face_tower))
 cutscene_manager.start()
 
 # create a cutscene manager for end scenes
@@ -133,14 +129,16 @@ for i in range(1, 17):
     end_images.append(temp_image)
 
 cutscene_end = CutsceneManager()
-cutscene_end.add_scene(DialogueScene('He had done wit. He had found the ultimate math equation.', 5, cutscene_font, reaching_power))
-#cutscene_end.add_scene(DialogueScene('He had done it. He had found the ultimate math equation.', 5, cutscene_font, reaching_power))
-
-cutscene_end.add_scene(TrippyScene(end_images, 10))
-
-cutscene_end.add_scene(DialogueScene('Jason had achieved godhood. He solved all humanity\'s problems and bought a'
-                                     'house where he lived happily thereafter', 4, cutscene_font, the_end))
-
+cutscene_end.add_scene(DialogueScene('In his relentless pursuit, Jason finally uncovered the ultimate math equation.', 5, cutscene_font, reaching_power))
+cutscene_end.add_scene(DialogueScene('In his relentless pursuit, Jason finally uncovered the ultimate math equation.', 5, cutscene_font, reaching_power))
+cutscene_end.add_scene(DialogueScene('But with this knowledge, the very essence of reality began to unravel.', 5, cutscene_font, reaching_power))
+cutscene_end.add_scene(TrippyScene(end_images, 6, cutscene_font, 'Visions of infinite equations danced before his eyes, warping his perception.'))
+cutscene_end.add_scene(TrippyScene(end_images, 6, cutscene_font, 'In this moment of transcendence, he understood everything and nothing.'))
+cutscene_end.add_scene(TrippyScene(end_images, 6, cutscene_font, 'He had ascended to godhood, but at what cost?'))
+cutscene_end.add_scene(DialogueScene('His newfound power allowed him to solve mysteries of the universe.', 6, cutscene_font, the_end))
+cutscene_end.add_scene(DialogueScene('Yet, in this omniscience, a profound loneliness enveloped him.', 6, cutscene_font, the_end))
+cutscene_end.add_scene(DialogueScene('Now the greatest mind dwells in isolation, haunted by his boundless knowledge.', 6, cutscene_font, the_end))
+cutscene_end.add_scene(DialogueScene('The End... or a new beginning?', 4, cutscene_font, the_end))
 cutscene_end.start()
 
 # ----------------------------------------------------
@@ -159,11 +157,11 @@ gameover_image = background_scaler(gameover)
 start_image = scale_image(pygame.image.load("assets/images/buttons/button_start.png").convert_alpha(),
                           constants.BUTTON_SCALE)
 exit_image = scale_image(pygame.image.load("assets/images/buttons/button_exit.png").convert_alpha(),
-                          constants.BUTTON_SCALE)
+                         constants.BUTTON_SCALE)
 restart_image = scale_image(pygame.image.load("assets/images/buttons/button_restart.png").convert_alpha(),
-                          constants.BUTTON_SCALE)
+                            constants.BUTTON_SCALE)
 resume_image = scale_image(pygame.image.load("assets/images/buttons/button_resume.png").convert_alpha(),
-                          constants.BUTTON_SCALE)
+                           constants.BUTTON_SCALE)
 
 # hearts
 empty_heart = scale_image(pygame.image.load("assets/images/items/heart_empty.png").convert_alpha(),
@@ -225,24 +223,27 @@ for mob in mob_types:
 
     mob_animations.append(temp_mob_list)
 
+
 # draws text onto screen
-def draw_text(text, font, color, x, y):
-    image = font.render(text, True, color)
-    screen.blit(image, (x, y))
+def draw_text(text, local_font, color, local_x, local_y):
+    local_image = local_font.render(text, True, color)
+    screen.blit(local_image, (local_x, local_y))
+
 
 def reset_level():
-  damage_text_group.empty()
-  projectile_group.empty()
-  item_group.empty()
-  fireball_group.empty()
+    damage_text_group.empty()
+    projectile_group.empty()
+    item_group.empty()
+    fireball_group.empty()
 
-  #create empty tile list
-  data = []
-  for row in range(constants.ROWS):
-    r = [-1] * constants.COLS
-    data.append(r)
+    # create empty tile list
+    data = []
+    for row in range(constants.ROWS):
+        r = [-1] * constants.COLS
+        data.append(r)
 
-  return data
+    return data
+
 
 # displays game info
 def game_info():
@@ -260,8 +261,8 @@ def game_info():
         else:
             screen.blit(empty_heart, (10 + i * 50, 0))
 
-    # draws the level number -- the shop is numbered 99
-    if level != 99:
+    # draws the level number
+    if level != 4:
         draw_text("LEVEL: " + str(level), font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
     else:
         draw_text("SHOP", font, constants.WHITE, constants.SCREEN_WIDTH / 2, 15)
@@ -271,7 +272,7 @@ def game_info():
 
 
 # class used for screen fading
-class ScreenFade():
+class ScreenFade:
     def __init__(self, direction, color, speed, fade_image=None):
         self.direction = direction
         self.color = color
@@ -285,18 +286,18 @@ class ScreenFade():
 
         if self.image:
             # if an image is provided, draw it at the center of the screen
-            image_x = (constants.SCREEN_WIDTH - self.image.get_width()) // 2
-            image_y = (constants.SCREEN_HEIGHT - self.image.get_height()) // 2
-            screen.blit(self.image, (image_x, image_y))
+            local_image_x = (constants.SCREEN_WIDTH - self.image.get_width()) // 2
+            local_image_y = (constants.SCREEN_HEIGHT - self.image.get_height()) // 2
+            screen.blit(self.image, (local_image_x, local_image_y))
 
-        if self.direction == 1: # fades up to open the game
+        if self.direction == 1:  # fades up to open the game
             pygame.draw.rect(screen, self.color, (0 - self.fade_counter, 0,
                                                   constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT))
             pygame.draw.rect(screen, self.color, (constants.SCREEN_WIDTH // 2 + self.fade_counter, 0,
                                                   constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
             pygame.draw.rect(screen, self.color, (0, 0 - self.fade_counter,
                                                   constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT // 2))
-            pygame.draw.rect(screen, self.color, (0, constants.SCREEN_HEIGHT//2 + self.fade_counter,
+            pygame.draw.rect(screen, self.color, (0, constants.SCREEN_HEIGHT // 2 + self.fade_counter,
                                                   constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
         elif self.direction == 2:  # fades down like it's closing the game
             pygame.draw.rect(screen, self.color, (0, 0, constants.SCREEN_WIDTH, 0 + self.fade_counter))
@@ -306,11 +307,14 @@ class ScreenFade():
 
         return fade_complete
 
+
 # ----------------------------------------------------
 # |                    World Gen                     |
 # ----------------------------------------------------
 
 level_width, level_height = 15, 15
+
+
 def add_perimeter_walls(world_data, wall_tile_index):
     rows = level_width
     columns = level_height
@@ -325,6 +329,8 @@ def add_perimeter_walls(world_data, wall_tile_index):
         world_data[row][0] = wall_tile_index
         world_data[row][columns - 1] = wall_tile_index
 
+
+# unused method
 def place_exit(world_data, exit_tile_index):
     rows = level_width
     columns = level_height
@@ -333,10 +339,11 @@ def place_exit(world_data, exit_tile_index):
         x = random.randint(1, rows - 2)
         y = random.randint(1, columns - 2)
 
-        # Ensure the chosen spot is not a wall
-        if world_data[x][y] != 7:  # Assuming 7 is the wall tile index
+        # ensures the chosen spot for the exit is not a wall
+        if world_data[x][y] != 7:
             world_data[x][y] = exit_tile_index
             break
+
 
 # tile set creation for level
 world_data = []
@@ -369,10 +376,6 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
 #         else:
 #             print(tile_type)
 #             world_data[x][y] = -1
-
-
-
-
 # add_perimeter_walls(world_data, 7)
 # place_exit(world_data, 8)
 # world_data[5][5] = 11
@@ -380,7 +383,6 @@ with open(f"levels/level{level}_data.csv", newline="") as csvfile:
 
 world = World()
 world.process_data(world_data, tile_list, all_items, mob_animations)
-
 
 
 # damage class
@@ -435,7 +437,7 @@ death_fade = ScreenFade(2, constants.FADE_BLACK, 12)
 # ----------------------------------------------------
 
 # creates buttons
-start_button = Button(constants.SCREEN_WIDTH // 2 - 45, constants.SCREEN_HEIGHT // 2 + 50, start_image)
+start_button = Button(825, 475, start_image)
 exit_button = Button(25, 475, exit_image)
 restart_button = Button(constants.SCREEN_WIDTH // 2 - restart_image.get_width() // 2, 450, restart_image)
 resume_button = Button(constants.SCREEN_WIDTH // 2 - 175, constants.SCREEN_HEIGHT // 2 - 150, resume_image)
@@ -448,13 +450,8 @@ game_won = False
 while run:
     # sets frame rate and screen background color
     clock.tick(constants.FPS)
-
     if not start_game:
-
         screen.blit(intro_image, (0, 0))
-        #screen.fill(constants.MENU_BACKGROUND)
-        #draw_text("JASON JOURNEY", font, constants.BLACK, 270, 100)
-
         if start_button.draw(screen):
             start_game = True
             start_intro = True
@@ -489,13 +486,12 @@ while run:
 
         else:
             screen.fill(constants.BACKGROUND)
-
             # player can't run around after he's dead
             if player.alive:
                 # change in x and y
                 dx = 0
                 dy = 0
-        
+
                 if moving_right:
                     dx = constants.PLAYER_SPEED
                 if moving_left:
@@ -504,14 +500,14 @@ while run:
                     dy = -constants.PLAYER_SPEED
                 if moving_down:
                     dy = constants.PLAYER_SPEED
-        
+
                 # moves player and stores screen scroll returned value
                 screen_scroll = player.move(dx, dy, world.wall_tiles)
-        
+
                 # ----------------------------------------------------
                 # |                 Update Methods                   |
                 # ----------------------------------------------------
-    
+
                 # level tile set
                 world.update(screen_scroll)
 
@@ -522,21 +518,21 @@ while run:
                         fireball_group.add(fireball)
                     if enemy.alive:
                         enemy.update()
-    
+
                 # non-playable characters (npcs) such as the Merchant
                 for npc in npc_list:
                     npc.ai(player, world.wall_tiles, screen_scroll, fireball_image)
                     npc.update()
-    
+
                 # player animated state
                 player.update()
-        
+
                 # projectile state
                 projectile = pistol.update(player)
                 if projectile:
                     projectile_group.add(projectile)
                     projectile_fx.play()
-        
+
                 # working collision of projectiles with enemies
                 for projectile in projectile_group:
                     characters_list = enemy_list + npc_list
@@ -548,7 +544,7 @@ while run:
 
                 damage_text_group.update()
                 fireball_group.update(screen_scroll, player)
-        
+
                 # scrolls screen while keeping items where they belong
                 item_group.update(screen_scroll, player, coin_fx, potion_fx)
 
@@ -564,19 +560,19 @@ while run:
                 enemy.draw(screen)
             for npc in npc_list:
                 npc.draw(screen)
-            
+
             # main character, weapon, and items
             player.draw(screen)
             pistol.draw(screen)
             item_group.draw(screen)
-            
+
             # projectiles
             for projectile in projectile_group:
                 projectile.draw(screen)
             for fireball in fireball_group:
                 fireball.draw(screen)
             damage_text_group.draw(screen)
-        
+
             # top part of screen with hp, text, coin sprite
             game_info()
             score_coin.draw(screen)
@@ -683,9 +679,7 @@ while run:
                         # add the items from the level data
                         for item in world.all_items:
                             item_group.add(item)
-    
-                # delete temp_hp = player.health and player.health = temp_hp
-    
+
     for event in pygame.event.get():
 
         # finishes loop when you close the game window
